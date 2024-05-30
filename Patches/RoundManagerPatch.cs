@@ -13,7 +13,7 @@ namespace tesinormed.FAndCDaveCo.Patches
 		[HarmonyPrefix]
 		public static void DespawnPropsAtEndOfRound(ref RoundManager __instance)
 		{
-			if (__instance.IsServer && StartOfRound.Instance.allPlayersDead && PolicyState.Instance.Policy.Tier != PolicyTier.NONE)
+			if (__instance.IsServer && StartOfRound.Instance.allPlayersDead && Plugin.PolicyState.Policy.Tier != PolicyTier.NONE)
 			{
 				var lootValue = GameObject.Find("/Environment/HangarShip").GetComponentsInChildren<GrabbableObject>()
 					.Where(obj => obj.itemProperties.isScrap && obj is not RagdollGrabbableObject)
@@ -22,8 +22,8 @@ namespace tesinormed.FAndCDaveCo.Patches
 
 				if (lootValue > 0)
 				{
-					PolicyState.Instance.Claims[GameStatistics.CurrentDay] = new(lootValue);
-					PolicyState.Resync();
+					Plugin.PolicyState.Claims[GameStatistics.CurrentDay] = new(lootValue);
+					Plugin.UpdateState();
 
 					Plugin.Logger.LogInfo($"crew all dead, recording pending claim with value of {lootValue} for day {GameStatistics.CurrentDay}");
 				}

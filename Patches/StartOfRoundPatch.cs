@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using LethalNetworkAPI;
 using System.Collections;
-using System.Linq;
 using tesinormed.FAndCDaveCo.Events;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Misc;
@@ -20,39 +19,42 @@ namespace tesinormed.FAndCDaveCo.Patches
 				yield return values.Current;
 			} while (values.MoveNext());
 
-			if (__instance.IsServer && PolicyState.Instance.Policy != Policy.NONE)
+			if (__instance.IsServer)
 			{
-				if (Plugin.Terminal.groupCredits - PolicyState.Instance.TotalPremium >= 0)
+				if (Plugin.PolicyState.Policy != Policy.NONE)
 				{
-					LethalServerMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
-					deductGroupCredits.SendAllClients(PolicyState.Instance.TotalPremium);
+					if (Plugin.Terminal.groupCredits - Plugin.PolicyState.TotalPremium >= 0)
+					{
+						LethalServerMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
+						deductGroupCredits.SendAllClients(Plugin.PolicyState.TotalPremium);
 
-					LethalServerEvent insuranceRenewalSuccess = new(identifier: HUDManagerEvents.INSURANCE_RENEWAL_SUCCESS_IDENTIFIER);
-					insuranceRenewalSuccess.InvokeAllClients();
+						LethalServerEvent insuranceRenewalSuccess = new(identifier: HUDManagerEvents.INSURANCE_RENEWAL_SUCCESS_IDENTIFIER);
+						insuranceRenewalSuccess.InvokeAllClients();
 
-					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {PolicyState.Instance.TotalPremium}");
+						Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.PolicyState.TotalPremium}");
+					}
+					else
+					{
+						Plugin.PolicyState.Policy = Policy.NONE;
+						Plugin.UpdateState();
+
+						LethalServerEvent insuranceRenewalFail = new(identifier: HUDManagerEvents.INSURANCE_RENEWAL_FAIL_IDENTIFIER);
+						insuranceRenewalFail.InvokeAllClients();
+
+						Plugin.Logger.LogDebug($"insurance failed to renew");
+					}
 				}
-				else
+
+				foreach (var pair in Plugin.PolicyState.Claims)
 				{
-					PolicyState.Instance.Policy = Policy.NONE;
-					PolicyState.Resync();
-
-					LethalServerEvent insuranceRenewalFail = new(identifier: HUDManagerEvents.INSURANCE_RENEWAL_FAIL_IDENTIFIER);
-					insuranceRenewalFail.InvokeAllClients();
-
-					Plugin.Logger.LogDebug($"insurance failed to renew");
+					if ((GameStatistics.CurrentDay - pair.Key) > 5)
+					{
+						Plugin.PolicyState.Claims.Remove(pair.Key);
+						Plugin.Logger.LogInfo($"deleted >5 day old claim from day {pair.Key}: {pair.Value}");
+					}
 				}
+				Plugin.UpdateState();
 			}
-
-			foreach (var pair in PolicyState.Instance.Claims)
-			{
-				if ((GameStatistics.CurrentDay - pair.Key) > 5)
-				{
-					PolicyState.Instance.Claims.Remove(pair.Key);
-					Plugin.Logger.LogDebug($"deleted >5 day old claim from day {pair.Key}: {pair.Value}");
-				}
-			}
-			PolicyState.Resync();
 		}
 	}
 }

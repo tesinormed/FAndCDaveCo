@@ -2,9 +2,10 @@
 
 namespace tesinormed.FAndCDaveCo.Insurance
 {
-	[Serializable]
+	[ES3Serializable]
 	public record Policy
 	{
+		[ES3NonSerializable]
 		public static readonly Policy NONE = new(PolicyTier.NONE, 0);
 
 		public PolicyTier Tier;
@@ -12,12 +13,13 @@ namespace tesinormed.FAndCDaveCo.Insurance
 
 		public Policy(PolicyTier tier, int coverage)
 		{
-			if (coverage < 0) throw new ArgumentOutOfRangeException(nameof(Coverage), $"coverage cannot be less than zero");
+			if (coverage < 0) throw new ArgumentOutOfRangeException(nameof(coverage), $"coverage cannot be less than zero");
 
 			Tier = tier;
 			Coverage = coverage;
 		}
 
+		[ES3NonSerializable]
 		public int BasePremium
 		{
 			get
@@ -32,6 +34,7 @@ namespace tesinormed.FAndCDaveCo.Insurance
 			}
 		}
 
+		[ES3NonSerializable]
 		public double DeductiblePercent => Tier switch
 		{
 			PolicyTier.HIGH_DEDUCTIBLE => 0.30,
@@ -39,6 +42,7 @@ namespace tesinormed.FAndCDaveCo.Insurance
 			PolicyTier.NO_DEDUCTIBLE => 0.00,
 			_ => 0.00,
 		};
+		[ES3NonSerializable]
 		public int DeductibleMinimum => Tier switch
 		{
 			PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.20),
@@ -46,6 +50,7 @@ namespace tesinormed.FAndCDaveCo.Insurance
 			PolicyTier.NO_DEDUCTIBLE => 0,
 			_ => 0,
 		};
+		[ES3NonSerializable]
 		public int DeductibleMaximum => Tier switch
 		{
 			PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.50),

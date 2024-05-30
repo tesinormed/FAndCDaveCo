@@ -12,10 +12,10 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 	{
 		private const string TITLE = $"{PolicyTerminal.TITLE}: Make a claim";
 
-		private CursorElement CreateCursorElement(int day, PolicyClaim claim, PolicyState state) => CursorElement.Create
+		private CursorElement CreateCursorElement(int day, PolicyClaim claim) => CursorElement.Create
 		(
 			name: $"Day {day}: ${claim.Value}",
-			action: () => ConfirmClaim(day, claim, state),
+			action: () => ConfirmClaim(day, claim),
 			active: (_) => true,
 			selectInactive: false
 		);
@@ -37,7 +37,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
-			if (PolicyState.Instance.Policy.Tier == PolicyTier.NONE)
+			if (Plugin.PolicyState.Policy.Tier == PolicyTier.NONE)
 			{
 				SwitchScreen(
 					BoxedScreen.Create(
@@ -50,7 +50,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
-			if (PolicyState.Instance.UnclaimedClaims.Count == 0)
+			if (Plugin.PolicyState.UnclaimedClaims.Count == 0)
 			{
 				SwitchScreen(
 					BoxedScreen.Create(
@@ -64,9 +64,9 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			}
 
 			CursorElement[] cursorElements = [];
-			foreach (var pair in PolicyState.Instance.UnclaimedClaims)
+			foreach (var pair in Plugin.PolicyState.UnclaimedClaims)
 			{
-				cursorElements = [.. cursorElements, CreateCursorElement(pair.Key, pair.Value, PolicyState.Instance)];
+				cursorElements = [.. cursorElements, CreateCursorElement(pair.Key, pair.Value)];
 			}
 			var cursorMenu = CursorMenu.Create(startingCursorIndex: 0, elements: cursorElements);
 
@@ -84,7 +84,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			currentCursorMenu = cursorMenu;
 		}
 
-		private void ConfirmClaim(int day, PolicyClaim claim, PolicyState state)
+		private void ConfirmClaim(int day, PolicyClaim claim)
 		{
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
@@ -99,19 +99,19 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
-			var deductible = state.Policy.CalculateDeductible(claim.Value);
-			var payout = state.Policy.CalculatePayout(claim.Value);
+			var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
+			var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
 
 			Confirm(
 				title: TITLE,
 				description: $"Are you sure you want to confirm this claim?\nYou will be given back ${payout}.\nYour deductible is ${deductible}.",
-				confirmAction: () => ProcessClaim(day, deductible, payout, claim, state),
+				confirmAction: () => ProcessClaim(day, deductible, payout, claim),
 				declineAction: () => SwitchScreen(previousScreen, previousCursorMenu, previous: true)
 			);
 			return;
 		}
 
-		private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim, PolicyState state)
+		private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim)
 		{
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
@@ -126,8 +126,8 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
-			state.Claims[day] = new(claim.Value, true);
-			PolicyState.Resync();
+			Plugin.PolicyState.Claims[day] = new(claim.Value, true);
+			Plugin.UpdateState();
 
 			// update credits
 			LethalServerMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
@@ -139,7 +139,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			ITextElement[] textElements = [
 				TextElement.Create($"You have been given a gold bar worth ${payout}."),
 				TextElement.Create($"You have been charged ${deductible}."),
-				TextElement.Create($"Your premiums have increased by {(int) (state.FractionalPremiumIncrease * 100)}%."),
+				TextElement.Create($"Your premiums have increased by {(int) (Plugin.PolicyState.FractionalPremiumIncrease * 100)}%."),
 			];
 			var screen = BoxedScreen.Create(title: TITLE, elements: textElements);
 			var cursorMenu = CursorMenu.Create(startingCursorIndex: 0);

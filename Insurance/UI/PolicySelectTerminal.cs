@@ -27,7 +27,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				new()
 				{
 					Policy = policy,
-					Claims = PolicyState.Instance.Claims,
+					Claims = Plugin.PolicyState.Claims,
 				}
 			),
 			active: (_) => true,
@@ -124,7 +124,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 
 		private void ConfirmEverything(PolicyState state)
 		{
-			if (state.Policy == PolicyState.Instance.Policy)
+			if (state.Policy == Plugin.PolicyState.Policy)
 			{
 				ErrorMessage(
 					title: TITLE,
@@ -137,15 +137,9 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
 
-			string deductibleText;
-			if (state.Policy.DeductiblePercent == 0.00)
-			{
-				deductibleText = $"This policy has no deductibles.";
-			}
-			else
-			{
-				deductibleText = $"The deductibles are {(int) (state.Policy.DeductiblePercent * 100)}%, with a minimum of ${state.Policy.DeductibleMinimum}\nand a maximum of ${state.Policy.DeductibleMaximum}.";
-			}
+			string deductibleText = state.Policy.DeductiblePercent == 0.00
+				? "This policy has no deductibles."
+				: $"The deductibles are {(int) (state.Policy.DeductiblePercent * 100)}%, with a minimum of ${state.Policy.DeductibleMinimum} and a maximum of ${state.Policy.DeductibleMaximum}.";
 
 			Confirm(
 				title: TITLE,
@@ -171,9 +165,8 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
-			PolicyState.Instance.Policy = policy;
-			PolicyState.Resync();
-			Plugin.Logger.LogDebug($"policy updated to {policy}");
+			Plugin.PolicyState.Policy = policy;
+			Plugin.UpdateState();
 
 			LethalServerMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
 			deductGroupCredits.SendAllClients(cost);

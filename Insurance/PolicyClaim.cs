@@ -2,7 +2,7 @@
 
 namespace tesinormed.FAndCDaveCo.Insurance
 {
-	[Serializable]
+	[ES3Serializable]
 	public record PolicyClaim
 	{
 		public readonly int Value;

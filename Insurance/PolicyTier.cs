@@ -2,7 +2,6 @@
 
 namespace tesinormed.FAndCDaveCo.Insurance
 {
-	[Serializable]
 	public enum PolicyTier : byte
 	{
 		NONE,

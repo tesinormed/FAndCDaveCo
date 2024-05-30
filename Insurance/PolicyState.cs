@@ -1,62 +1,60 @@
-﻿using LethalModDataLib.Base;
-using LethalNetworkAPI;
-using System;
+﻿using LethalModDataLib.Attributes;
+using LethalModDataLib.Base;
+using LethalModDataLib.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace tesinormed.FAndCDaveCo.Insurance
 {
-	[Serializable]
+	[ES3Serializable]
 	public class PolicyState : ModDataContainer
 	{
+		[ModDataIgnore(IgnoreFlags.None)]
 		public const string POLICY_NETWORK_IDENTIFIER = "Policy";
+		[ModDataIgnore(IgnoreFlags.None)]
 		public const string CLAIMS_NETWORK_IDENTIFIER = "Claims";
-		public static PolicyState Instance = new();
-		public static LethalNetworkVariable<T> CreateLethalNetworkVariable<T>(string identifier, params Action<T>[] onValueChanged)
-		{
-			LethalNetworkVariable<T> variable = new(identifier);
-			foreach (var action in onValueChanged) { variable.OnValueChanged += action; }
-			return variable;
-		}
-		public static readonly LethalNetworkVariable<Policy> SyncedPolicy = CreateLethalNetworkVariable<Policy>(
-			identifier: POLICY_NETWORK_IDENTIFIER,
-			(data) => { Instance.Policy = data; }
-		);
-		public static readonly LethalNetworkVariable<Dictionary<int, PolicyClaim>> SyncedClaims = CreateLethalNetworkVariable<Dictionary<int, PolicyClaim>>(
-			identifier: CLAIMS_NETWORK_IDENTIFIER,
-			(data) => { Instance.Claims = data; }
-		);
 
 		public Policy Policy { get; set; } = Policy.NONE;
 		public Dictionary<int, PolicyClaim> Claims { get; set; } = [];
+		[ModDataIgnore(IgnoreFlags.None)]
 		public Dictionary<int, PolicyClaim> ClaimedClaims => Claims
 			.Where(pair => pair.Value.Claimed)
 			.ToDictionary();
+		[ModDataIgnore(IgnoreFlags.None)]
 		public Dictionary<int, PolicyClaim> UnclaimedClaims => Claims
 			.Where(pair => !pair.Value.Claimed)
 			.ToDictionary();
 
-		public PolicyState() { }
+		[ModDataIgnore(IgnoreFlags.None)]
+		public double FractionalPremiumIncrease => ClaimedClaims.Count * 0.15;
+		[ModDataIgnore(IgnoreFlags.None)]
+		public int TotalPremium => (int) (Policy.BasePremium * (1.00 + FractionalPremiumIncrease));
 
+		public PolicyState() { }
 		public PolicyState(Policy policy, Dictionary<int, PolicyClaim> claims)
 		{
 			Policy = policy;
 			Claims = claims;
 		}
 
-		public double FractionalPremiumIncrease => ClaimedClaims.Count * 0.15;
-		public int TotalPremium => (int) (Policy.BasePremium * (1.00 + FractionalPremiumIncrease));
-
 		public void Reset()
 		{
 			Policy = Policy.NONE;
 			Claims = [];
+			PostReset();
 		}
 
-		public static void Resync()
+		protected override void PostSave()
 		{
-			SyncedPolicy.Value = Instance.Policy;
-			SyncedClaims.Value = Instance.Claims;
+			Plugin.Logger.LogDebug($"saved policy state {this}");
+		}
+		protected override void PostLoad()
+		{
+			Plugin.Logger.LogDebug($"loaded policy state {this}");
+		}
+		private void PostReset()
+		{
+			Plugin.Logger.LogDebug("reset policy state");
 		}
 	}
 }
