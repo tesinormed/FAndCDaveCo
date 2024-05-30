@@ -7,6 +7,7 @@ It has an agreement with the Company to offer its services to Company employees.
 
 ## Credits
 
+- [Lethal Company Modding Wiki](https://lethal.wiki/)
 - [Distractic](https://github.com/Distractic): [LethalCompanyTemplate](https://github.com/Distractic/LethalCompanyTemplate)
 - [MaxWasUnavailable](https://github.com/MaxWasUnavailable): [LobbyCompatibility](https://github.com/MaxWasUnavailable/LobbyCompatibility), [LethalModDataLib](https://github.com/MaxWasUnavailable/LethalModDataLib)
 - [WhiteSpike](https://github.com/WhiteSpike): [InteractiveTerminalAPI](https://github.com/WhiteSpike/InteractiveTerminalAPI)
@@ -15,6 +16,7 @@ It has an agreement with the Company to offer its services to Company employees.
 - akechii: [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
 - [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
 - [remiX-](https://github.com/remiX-): [LethalCredit](https://github.com/remiX-/LethalCredit)
+- [dancemoon](https://github.com/quackest): [DanceTools](https://github.com/quackest/dancetools)
 
 ## Features
 
