@@ -27,6 +27,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				{
 					textElements = [.. textElements, TextElement.Create($"You pay ${Plugin.PolicyState.TotalPremium} per day.")];
 				}
+				// show only if increased premium
 				else
 				{
 					textElements =
@@ -36,6 +37,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 					];
 				}
 
+				// show only if has deductible
 				if (Plugin.PolicyState.Policy.DeductiblePercent == 0.00)
 				{
 					textElements = [.. textElements, TextElement.Create("You do not pay deductibles.")];

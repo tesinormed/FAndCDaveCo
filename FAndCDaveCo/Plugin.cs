@@ -12,7 +12,6 @@ using tesinormed.FAndCDaveCo.Banking.UI;
 using tesinormed.FAndCDaveCo.Events;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Insurance.UI;
-using tesinormed.FAndCDaveCo.Misc;
 
 namespace tesinormed.FAndCDaveCo
 {
@@ -30,40 +29,21 @@ namespace tesinormed.FAndCDaveCo
 		public static Terminal Terminal { get; set; } = null!;
 
 		public static PolicyState PolicyState { get; private set; } = null!;
-		public static LethalNetworkVariable<Policy> SyncedPolicy = LethalNetworkCreator.CreateVariable<Policy>(
-			identifier: PolicyState.POLICY_NETWORK_IDENTIFIER,
-			(data) =>
-			{
-				PolicyState.Policy = data;
-				Logger.LogDebug($"synced policy state policy {data}");
-			}
-		);
-		public static LethalNetworkVariable<Dictionary<int, PolicyClaim>> SyncedClaims = LethalNetworkCreator.CreateVariable<Dictionary<int, PolicyClaim>>(
-			identifier: PolicyState.CLAIMS_NETWORK_IDENTIFIER,
-			(data) =>
-			{
-				PolicyState.Claims = data;
-				Logger.LogDebug($"synced policy state claims {data}");
-			}
-		);
+		public static LethalNetworkVariable<Policy> SyncedPolicy = new(identifier: PolicyState.POLICY_NETWORK_IDENTIFIER);
+		public static LethalNetworkVariable<Dictionary<int, PolicyClaim>> SyncedClaims = new(identifier: PolicyState.CLAIMS_NETWORK_IDENTIFIER);
 
 		public static BankState BankState { get; private set; } = null!;
-		public static LethalNetworkVariable<Dictionary<int, int>> SyncedLoans = LethalNetworkCreator.CreateVariable<Dictionary<int, int>>(
-			identifier: BankState.LOANS_NETWORK_IDENTIFIER,
-			(data) =>
-			{
-				BankState.Loans = data;
-				Logger.LogDebug($"synced bank state loans {data}");
-			}
-		);
+		public static LethalNetworkVariable<Dictionary<int, int>> SyncedLoans = new(identifier: BankState.LOANS_NETWORK_IDENTIFIER);
 
 		private void Awake()
 		{
 			Logger = base.Logger;
 			Instance = this;
 
+			InitNetworkVariables();
 			InitState();
 			RegisterTerminal();
+			NetworkVariableEvents.Init();
 			CreditEvents.Init();
 			HUDManagerEvents.Init();
 
@@ -72,6 +52,25 @@ namespace tesinormed.FAndCDaveCo
 			Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
 		}
 
+		private void InitNetworkVariables()
+		{
+			SyncedPolicy.OnValueChanged += (data) =>
+			{
+				PolicyState.Policy = data;
+				Logger.LogDebug($"synced policy state policy {data}");
+			};
+			SyncedClaims.OnValueChanged += (data) =>
+			{
+				PolicyState.Claims = data;
+				Logger.LogDebug($"synced policy state claims {data}");
+			};
+
+			SyncedLoans.OnValueChanged += (data) =>
+			{
+				BankState.Loans = data;
+				Logger.LogDebug($"synced bank state loans {data}");
+			};
+		}
 		private void InitState()
 		{
 			PolicyState = new();
@@ -86,8 +85,6 @@ namespace tesinormed.FAndCDaveCo
 			{
 				PolicyState.Load();
 				BankState.Load();
-
-				UpdateState();
 			};
 			SaveLoadEvents.PostDeleteSaveEvent += (_) =>
 			{
@@ -102,13 +99,6 @@ namespace tesinormed.FAndCDaveCo
 				PolicyState.Save();
 				BankState.Save();
 			};
-		}
-		public static void UpdateState()
-		{
-			SyncedPolicy.Value = PolicyState.Policy;
-			SyncedClaims.Value = PolicyState.Claims;
-
-			SyncedLoans.Value = BankState.Loans;
 		}
 
 		private void RegisterTerminal()

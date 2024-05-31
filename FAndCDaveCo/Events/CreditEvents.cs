@@ -12,39 +12,53 @@ namespace tesinormed.FAndCDaveCo.Events
 
 		public static void Init()
 		{
-			LethalClientMessage<int> deductGroupCredits = new(
+			LethalServerMessage<int> deductGroupCredits = new(
 				identifier: DEDUCT_GROUP_CREDITS_IDENTIFIER,
-				onReceived: (amount) =>
+				onReceived: (amount, _) =>
 				{
+					// make sure credits won't be negative
 					if ((Plugin.Terminal.groupCredits - amount) < 0)
 					{
-						Plugin.Logger.LogWarning($"could not deduct {amount} credits; balance would be under 0");
+						Plugin.Logger.LogError($"could not deduct {amount} credits; balance would be under 0");
 						return;
 					}
 
+					// deduct credits
 					Plugin.Terminal.groupCredits -= amount;
+					// sync credits
+					Plugin.Terminal.SyncGroupCreditsServerRpc(Plugin.Terminal.groupCredits, Plugin.Terminal.numberOfItemsInDropship);
+
 					Plugin.Logger.LogDebug($"deducted {amount} credits.");
 				}
 			);
 
-			LethalClientMessage<int> spawnGoldBar = new(
+			LethalServerMessage<int> spawnGoldBar = new(
 				identifier: SPAWN_GOLD_BAR_IDENTIFIER,
-				onReceived: (value) =>
+				onReceived: (value, client) =>
 				{
+					// find item
 					var item = StartOfRound.Instance.allItemsList.itemsList.Single(item => item.itemName.ToLower() == "gold bar");
-					Vector3 position = GameNetworkManager.Instance.localPlayerController.transform.position;
-					var playerController = StartOfRound.Instance.localPlayerController;
+					// get player controller
+					var playerController = client.GetPlayerController();
+					if (playerController == null)
+					{
+						Plugin.Logger.LogError($"could not get player controller for client {client}");
+						return;
+					}
+					// position to spawn at
+					Vector3 position = playerController.transform.position;
 
 					GameObject obj = Object.Instantiate(item.spawnPrefab, position, Quaternion.identity);
-
+					// set object properties (scrap, value, location, etc)
 					obj.GetComponent<GrabbableObject>().itemProperties.isScrap = true;
 					obj.GetComponent<GrabbableObject>().itemProperties.creditsWorth = value;
 					obj.GetComponent<GrabbableObject>().SetScrapValue(value);
 					playerController.SetItemInElevator(true, true, obj.GetComponent<GrabbableObject>());
 					obj.transform.SetParent(GameObject.Find("/Environment/HangarShip").transform, worldPositionStays: true);
-
+					// spawn object
 					obj.GetComponent<NetworkObject>().Spawn();
-					Plugin.Logger.LogDebug($"spawned gold bar with value of {value} at player ID {playerController.GetClientId()}");
+
+					Plugin.Logger.LogDebug($"spawned gold bar with value of {value} at client {playerController.GetClientId()}");
 				}
 			);
 		}

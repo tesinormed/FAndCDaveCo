@@ -7,6 +7,8 @@ It has an agreement with the Company to offer its services to Company employees.
 
 ## Credits
 
+Thank you to the following people for the documentation, libraries, and references.
+
 - [Lethal Company Modding Wiki](https://lethal.wiki/)
 - [Distractic](https://github.com/Distractic): [LethalCompanyTemplate](https://github.com/Distractic/LethalCompanyTemplate)
 - [MaxWasUnavailable](https://github.com/MaxWasUnavailable): [LobbyCompatibility](https://github.com/MaxWasUnavailable/LobbyCompatibility), [LethalModDataLib](https://github.com/MaxWasUnavailable/LethalModDataLib)
@@ -52,16 +54,14 @@ It has an agreement with the Company to offer its services to Company employees.
 	- Get information on the current insurance policy
 - `insurance select`, `insurance configure`
 	- Select a new insurance policy
-	- Can only be used as a host while in orbit
 - `insurance claim`, `insurance claims`, `insurance make claim`
 	- Confirm an insurance claim
-	- Can only be used as a host while in orbit
 	- You must have a insurance policy
+	- Look below you for the gold bar
 
 ### Banking (**not implemented**)
 
 - `bank loan select`, `bank loan`
 	- Select a loan to take out
-	- Can only be used as a host (either in orbit or landed)
 - `bank loan list`, `bank loan info`, `bank loans`
 	- List current unpaid loans

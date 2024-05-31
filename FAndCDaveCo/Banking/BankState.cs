@@ -32,6 +32,9 @@ namespace tesinormed.FAndCDaveCo.Banking
 		protected override void PostLoad()
 		{
 			Plugin.Logger.LogDebug($"loaded bank state {this}");
+
+			// sync to network
+			Plugin.SyncedLoans.Value = Loans;
 		}
 		private void PostReset()
 		{

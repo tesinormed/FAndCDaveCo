@@ -52,6 +52,10 @@ namespace tesinormed.FAndCDaveCo.Insurance
 		protected override void PostLoad()
 		{
 			Plugin.Logger.LogDebug($"loaded policy state {this}");
+
+			// sync over network
+			Plugin.SyncedPolicy.Value = Policy;
+			Plugin.SyncedClaims.Value = Claims;
 		}
 		private void PostReset()
 		{

@@ -3,8 +3,8 @@ using InteractiveTerminalAPI.UI.Application;
 using InteractiveTerminalAPI.UI.Cursor;
 using InteractiveTerminalAPI.UI.Screen;
 using LethalNetworkAPI;
+using System.Collections.Generic;
 using tesinormed.FAndCDaveCo.Events;
-using tesinormed.FAndCDaveCo.Misc;
 
 namespace tesinormed.FAndCDaveCo.Insurance.UI
 {
@@ -24,19 +24,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 
 		public override void Initialization()
 		{
-			if (!GameStatistics.IsInOrbit)
-			{
-				SwitchScreen(
-					BoxedScreen.Create(
-						title: TITLE,
-						elements: [TextElement.Create("You can only make a claim while you are in orbit.")]
-					),
-					CursorMenu.Create(startingCursorIndex: 0),
-					previous: false
-				);
-				return;
-			}
-
+			// no policy
 			if (Plugin.PolicyState.Policy.Tier == PolicyTier.NONE)
 			{
 				SwitchScreen(
@@ -50,6 +38,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
+			// no claims
 			if (Plugin.PolicyState.UnclaimedClaims.Count == 0)
 			{
 				SwitchScreen(
@@ -63,6 +52,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
+			// make a cursor element for each claim
 			CursorElement[] cursorElements = [];
 			foreach (var pair in Plugin.PolicyState.UnclaimedClaims)
 			{
@@ -89,16 +79,6 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
 
-			if (!GameStatistics.IsHostingGame)
-			{
-				ErrorMessage(
-					title: TITLE,
-					error: "You are not the host of this instance.",
-					backAction: () => SwitchScreen(previousScreen, previousCursorMenu, previous: true)
-				);
-				return;
-			}
-
 			var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
 			var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
 
@@ -116,6 +96,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
 
+			// make sure enough credits for deductible
 			if (terminal.groupCredits < deductible)
 			{
 				ErrorMessage(
@@ -126,15 +107,18 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
+			// set claims
 			Plugin.PolicyState.Claims[day] = new(claim.Value, true);
-			Plugin.UpdateState();
+			// sync over network
+			LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(identifier: NetworkVariableEvents.UPDATE_CLAIMS_IDENTIFIER);
+			updateClaims.SendServer(Plugin.PolicyState.Claims);
 
-			// update credits
-			LethalServerMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
-			deductGroupCredits.SendAllClients(deductible);
+			LethalClientMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
+			deductGroupCredits.SendServer(deductible);
 
-			LethalServerMessage<int> spawnGoldBar = new(identifier: CreditEvents.SPAWN_GOLD_BAR_IDENTIFIER);
-			spawnGoldBar.SendClient(payout, terminal.roundManager.playersManager.localPlayerController.GetClientId());
+			// spawn bar with value of payout
+			LethalClientMessage<int> spawnGoldBar = new(identifier: CreditEvents.SPAWN_GOLD_BAR_IDENTIFIER);
+			spawnGoldBar.SendServer(payout);
 
 			ITextElement[] textElements = [
 				TextElement.Create($"You have been given a gold bar worth ${payout}."),

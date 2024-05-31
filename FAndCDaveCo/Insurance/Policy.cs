@@ -26,9 +26,9 @@ namespace tesinormed.FAndCDaveCo.Insurance
 			{
 				return Tier switch
 				{
-					PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.10),
-					PolicyTier.LOW_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.20),
-					PolicyTier.NO_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.35),
+					PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.10), // 10% of coverage
+					PolicyTier.LOW_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.20), // 20% of coverage
+					PolicyTier.NO_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.35), // 35% of coverage
 					_ => 0
 				};
 			}
@@ -37,24 +37,24 @@ namespace tesinormed.FAndCDaveCo.Insurance
 		[ES3NonSerializable]
 		public double DeductiblePercent => Tier switch
 		{
-			PolicyTier.HIGH_DEDUCTIBLE => 0.30,
-			PolicyTier.LOW_DEDUCTIBLE => 0.15,
-			PolicyTier.NO_DEDUCTIBLE => 0.00,
+			PolicyTier.HIGH_DEDUCTIBLE => 0.30, // 30%
+			PolicyTier.LOW_DEDUCTIBLE => 0.15, // 15%
+			PolicyTier.NO_DEDUCTIBLE => 0.00, // 0%
 			_ => 0.00,
 		};
 		[ES3NonSerializable]
 		public int DeductibleMinimum => Tier switch
 		{
-			PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.20),
-			PolicyTier.LOW_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.10),
+			PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.20), // 20% of coverage
+			PolicyTier.LOW_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.10), // 10% of coverage
 			PolicyTier.NO_DEDUCTIBLE => 0,
 			_ => 0,
 		};
 		[ES3NonSerializable]
 		public int DeductibleMaximum => Tier switch
 		{
-			PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.50),
-			PolicyTier.LOW_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.25),
+			PolicyTier.HIGH_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.50), // 50% of coverage
+			PolicyTier.LOW_DEDUCTIBLE => (int) Math.Floor(Coverage * 0.25), // 25% of coverage
 			PolicyTier.NO_DEDUCTIBLE => 0,
 			_ => 0,
 		};
@@ -69,6 +69,7 @@ namespace tesinormed.FAndCDaveCo.Insurance
 		{
 			if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "value cannot be less than zero");
 
+			// deductible percent times payout, clamped between minimum and maximum
 			return Math.Clamp(
 				(int) Math.Floor(CalculatePayout(value) * DeductiblePercent),
 				DeductibleMinimum,

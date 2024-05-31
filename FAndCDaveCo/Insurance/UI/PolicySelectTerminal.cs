@@ -5,7 +5,6 @@ using InteractiveTerminalAPI.UI.Screen;
 using LethalNetworkAPI;
 using System;
 using tesinormed.FAndCDaveCo.Events;
-using tesinormed.FAndCDaveCo.Misc;
 
 namespace tesinormed.FAndCDaveCo.Insurance.UI
 {
@@ -38,34 +37,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 
 		public override void Initialization()
 		{
-			if (!GameStatistics.IsHostingGame)
-			{
-				SwitchScreen(
-					BoxedScreen.Create(
-						title: TITLE,
-						elements: [TextElement.Create("You are not the host of this instance.")]
-					),
-					CursorMenu.Create(startingCursorIndex: 0),
-					previous: false
-				);
-				Plugin.Logger.LogDebug("local player tried to select policy when not hosting game");
-				return;
-			}
-
-			if (!GameStatistics.IsInOrbit)
-			{
-				SwitchScreen(
-					BoxedScreen.Create(
-						title: TITLE,
-						elements: [TextElement.Create("You can only change this while you are in orbit.")]
-					),
-					CursorMenu.Create(startingCursorIndex: 0),
-					previous: false
-				);
-				Plugin.Logger.LogDebug("local player tried to select policy when not in orbit");
-				return;
-			}
-
+			// create cursor element for each tier
 			CursorElement[] cursorElements =
 			[
 				CreatePolicyTierCursorElement(PolicyTier.HIGH_DEDUCTIBLE, "High deductible, low premium"),
@@ -93,6 +65,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
 
+			// create cursor element for each coverage and back out option
 			CursorElement[] cursorElements =
 			[
 				CreateCoverageCursorElement(policyTier.CreatePolicy(300)),
@@ -124,6 +97,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 
 		private void ConfirmEverything(PolicyState state)
 		{
+			// make sure policy is not the same as the current one
 			if (state.Policy == Plugin.PolicyState.Policy)
 			{
 				ErrorMessage(
@@ -137,6 +111,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
 
+			// inform user of deductible percent min and max
 			string deductibleText = state.Policy.DeductiblePercent == 0.00
 				? "This policy has no deductibles."
 				: $"The deductibles are {(int) (state.Policy.DeductiblePercent * 100)}%, with a minimum of ${state.Policy.DeductibleMinimum} and a maximum of ${state.Policy.DeductibleMaximum}.";
@@ -155,6 +130,7 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 			var previousScreen = currentScreen;
 			var previousCursorMenu = currentCursorMenu;
 
+			// make sure enough credits for initial premium payment
 			if (terminal.groupCredits < cost)
 			{
 				ErrorMessage(
@@ -165,11 +141,14 @@ namespace tesinormed.FAndCDaveCo.Insurance.UI
 				return;
 			}
 
+			// update policy
 			Plugin.PolicyState.Policy = policy;
-			Plugin.UpdateState();
+			// sync over network
+			LethalClientMessage<Policy> updatePolicy = new(identifier: NetworkVariableEvents.UPDATE_POLICY_IDENTIFIER);
+			updatePolicy.SendServer(policy);
 
-			LethalServerMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
-			deductGroupCredits.SendAllClients(cost);
+			LethalClientMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
+			deductGroupCredits.SendServer(cost);
 
 			ITextElement[] textElements = [
 				TextElement.Create($"Your policy has been updated to {policy.Tier.ToFriendlyString()} (${policy.Coverage})."),
