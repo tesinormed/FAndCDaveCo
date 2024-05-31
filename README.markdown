@@ -42,7 +42,7 @@ It has an agreement with the Company to offer its services to Company employees.
 	- Get a loan using the terminal
 	- Pay it off within 5 days for no penalty
 	- Pay it off within 10 days with quota penalty (increased quota)
-	- >10 days results in termination
+	- Greater than 10 days results in termination
 
 ## Terminal commands
 
