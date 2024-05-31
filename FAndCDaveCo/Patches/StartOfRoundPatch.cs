@@ -23,6 +23,18 @@ namespace tesinormed.FAndCDaveCo.Patches
 			// make sure we're the server
 			if (__instance.IsServer)
 			{
+				// garbage collect >5 day old claims
+				foreach (var pair in Plugin.PolicyState.Claims)
+				{
+					if ((GameStatistics.CurrentDay - pair.Key) > 5)
+					{
+						Plugin.PolicyState.Claims.Remove(pair.Key);
+						Plugin.Logger.LogInfo($"deleted >5 day old claim from day {pair.Key}: {pair.Value}");
+					}
+				}
+				// sync over network
+				Plugin.SyncedClaims.Value = Plugin.PolicyState.Claims;
+
 				// make sure there's a policy
 				if (Plugin.PolicyState.Policy != Policy.NONE)
 				{
@@ -53,18 +65,6 @@ namespace tesinormed.FAndCDaveCo.Patches
 						Plugin.Logger.LogDebug($"insurance failed to renew");
 					}
 				}
-
-				// garbage collect >5 day old claims
-				foreach (var pair in Plugin.PolicyState.Claims)
-				{
-					if ((GameStatistics.CurrentDay - pair.Key) > 5)
-					{
-						Plugin.PolicyState.Claims.Remove(pair.Key);
-						Plugin.Logger.LogInfo($"deleted >5 day old claim from day {pair.Key}: {pair.Value}");
-					}
-				}
-				// sync over network
-				Plugin.SyncedClaims.Value = Plugin.PolicyState.Claims;
 			}
 		}
 	}
