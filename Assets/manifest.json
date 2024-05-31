@@ -1,0 +1,12 @@
+{
+    "name": "FAndCDaveCo",
+    "description": "Adds an insurance and loan system.",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/tesinormed/FAndCDaveCo",
+    "dependencies": [
+		"BMX-LobbyCompatibility-1.1.0",
+		"WhiteSpike-Interactive_Terminal_API-1.1.2",
+		"MaxWasUnavailable-LethalModDataLib-1.2.2",
+		"xilophor-LethalNetworkAPI-2.1.7"
+    ]
+}
