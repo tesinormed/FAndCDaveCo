@@ -3,6 +3,7 @@ using LethalModDataLib.Base;
 using LethalModDataLib.Enums;
 using System.Collections.Generic;
 using System.Linq;
+using tesinormed.FAndCDaveCo.Misc;
 
 namespace tesinormed.FAndCDaveCo.Insurance
 {

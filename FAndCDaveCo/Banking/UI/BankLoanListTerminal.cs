@@ -20,7 +20,7 @@ namespace tesinormed.FAndCDaveCo.Banking.UI
 			else
 			{
 				textElements = [
-					TextElement.Create($"You currently have {Plugin.BankState.Loans.Count} unmatured loans."),
+					TextElement.Create($"You currently have {Plugin.BankState.Loans.Count} unpaid loans."),
 					TextElement.Create($"These loans total ${Plugin.BankState.Loans.Values.Sum()}."),
 				];
 			}

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using tesinormed.FAndCDaveCo.Misc;
 
-namespace tesinormed.FAndCDaveCo
+namespace tesinormed.FAndCDaveCo.Misc
 {
 	public static class DictionaryExtensions
 	{

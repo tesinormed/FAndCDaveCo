@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<AssemblyName>tesinormed.FAndCDaveCo</AssemblyName>
 		<Product>FAndCDaveCo</Product>
-		<Version>0.3.0</Version>
+		<Version>0.4.0</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -46,7 +46,7 @@
 	<ItemGroup>
 		<PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.1.0" PrivateAssets="all" />
 		<Reference Include="InteractiveTerminalAPI" PrivateAssets="All">
-			<HintPath>$(MSBuildProjectDirectory)\Dependencies\WhiteSpike-Interactive_Terminal_API-1.1.2.dll</HintPath>
+			<HintPath>$(MSBuildProjectDirectory)\..\Dependencies\WhiteSpike-Interactive_Terminal_API-1.1.2.dll</HintPath>
 		</Reference>
 		<PackageReference Include="MaxWasUnavailable.LethalModDataLib" Version="1.2.2" PrivateAssets="All" />
 		<PackageReference Include="Xilophor.LethalNetworkAPI" Version="2.1.7" PrivateAssets="all" />

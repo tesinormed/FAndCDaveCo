@@ -14,7 +14,6 @@ namespace tesinormed.FAndCDaveCo.Banking
 		public Dictionary<int, int> Loans { get; set; } = [];
 
 		public BankState() { }
-
 		public BankState(Dictionary<int, int> loans)
 		{
 			Loans = loans;

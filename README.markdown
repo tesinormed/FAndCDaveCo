@@ -38,9 +38,15 @@ It has an agreement with the Company to offer its services to Company employees.
 	- Make a claim using the terminal when you lose all your loot due to full crew death
 		- You must pay the deductible if your policy tier requires it.
 		- A gold bar with the value of the lost scrap (or policy coverage, if over it) will be given to you
-- Loan system when you need it for the quota (**not implemented**).
+- Loan system when you are short of the quota (**not implemented**)
+	- Get a loan using the terminal
+	- Pay it off within 5 days for no penalty
+	- Pay it off within 10 days with quota penalty (increased quota)
+	- >10 days results in termination
 
 ## Terminal commands
+
+### Insurance
 
 - `insurance info`, `insurance information`, `insurance policy`
 	- Get information on the current insurance policy
@@ -51,3 +57,11 @@ It has an agreement with the Company to offer its services to Company employees.
 	- Confirm an insurance claim
 	- Can only be used as a host while in orbit
 	- You must have a insurance policy
+
+### Banking (**not implemented**)
+
+- `bank loan select`, `bank loan`
+	- Select a loan to take out
+	- Can only be used as a host (either in orbit or landed)
+- `bank loan list`, `bank loan info`, `bank loans`
+	- List current unpaid loans

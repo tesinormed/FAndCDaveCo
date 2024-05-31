@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace System.Runtime.CompilerServices
+namespace tesinormed.FAndCDaveCo.Misc
 {
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	public static class IsExternalInit { }
