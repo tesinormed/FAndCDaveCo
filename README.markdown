@@ -7,9 +7,11 @@ It has an agreement with the Company to offer its services to Company employees.
 
 ## Credits
 
-Thank you to the following people for the documentation, libraries, and references.
+Thank you to the following people / groups for inspiration, documentation, libraries, and references.
 
-- [Lethal Company Modding Wiki](https://lethal.wiki/)
+- [domkalan](https://github.com/domkalan): [LethalInsurance](https://github.com/domkalan/LethalInsurance)
+- [remiX-](https://github.com/remiX-): [LethalCredit](https://github.com/remiX-/LethalCredit)
+- [Unofficial Lethal Company Community](https://github.com/LethalCompanyCommunity): [Lethal Company Modding Wiki](https://lethal.wiki/)
 - [Distractic](https://github.com/Distractic): [LethalCompanyTemplate](https://github.com/Distractic/LethalCompanyTemplate)
 - [MaxWasUnavailable](https://github.com/MaxWasUnavailable): [LobbyCompatibility](https://github.com/MaxWasUnavailable/LobbyCompatibility), [LethalModDataLib](https://github.com/MaxWasUnavailable/LethalModDataLib)
 - [WhiteSpike](https://github.com/WhiteSpike): [InteractiveTerminalAPI](https://github.com/WhiteSpike/InteractiveTerminalAPI)
@@ -17,7 +19,6 @@ Thank you to the following people for the documentation, libraries, and referenc
 - [tinyhoot](https://github.com/tinyhoot): [ShipLoot](https://github.com/tinyhoot/ShipLoot)
 - akechii: [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
 - [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
-- [remiX-](https://github.com/remiX-): [LethalCredit](https://github.com/remiX-/LethalCredit)
 - [dancemoon](https://github.com/quackest): [DanceTools](https://github.com/quackest/dancetools)
 
 ## Features

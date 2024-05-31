@@ -11,10 +11,10 @@ namespace tesinormed.FAndCDaveCo.Banking
 		[ModDataIgnore(IgnoreFlags.None)]
 		public const string LOANS_NETWORK_IDENTIFIER = "Loans";
 
-		public Dictionary<int, int> Loans { get; set; } = [];
+		public Dictionary<int, Loan> Loans { get; set; } = [];
 
 		public BankState() { }
-		public BankState(Dictionary<int, int> loans)
+		public BankState(Dictionary<int, Loan> loans)
 		{
 			Loans = loans;
 		}

@@ -1,5 +1,6 @@
 ﻿using LethalNetworkAPI;
 using System.Collections.Generic;
+using tesinormed.FAndCDaveCo.Banking;
 using tesinormed.FAndCDaveCo.Insurance;
 
 namespace tesinormed.FAndCDaveCo.Events
@@ -28,7 +29,7 @@ namespace tesinormed.FAndCDaveCo.Events
 				}
 			);
 
-			LethalServerMessage<Dictionary<int, int>> updateLoans = new(
+			LethalServerMessage<Dictionary<int, Loan>> updateLoans = new(
 				identifier: UPDATE_LOANS_IDENTIFIER,
 				onReceived: (value, _) =>
 				{
