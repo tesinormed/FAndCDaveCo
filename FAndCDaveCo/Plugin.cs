@@ -33,7 +33,7 @@ namespace tesinormed.FAndCDaveCo
 		public static LethalNetworkVariable<Dictionary<int, PolicyClaim>> SyncedClaims = new(identifier: PolicyState.CLAIMS_NETWORK_IDENTIFIER);
 
 		public static BankState BankState { get; private set; } = null!;
-		public static LethalNetworkVariable<Dictionary<int, int>> SyncedLoans = new(identifier: BankState.LOANS_NETWORK_IDENTIFIER);
+		public static LethalNetworkVariable<Dictionary<int, Loan>> SyncedLoans = new(identifier: BankState.LOANS_NETWORK_IDENTIFIER);
 
 		private void Awake()
 		{
