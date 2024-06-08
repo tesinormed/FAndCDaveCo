@@ -18,32 +18,29 @@ public class BankLoanGetTerminal : InteractiveTerminalApplicationExtension
 			return;
 		}
 
-		if (Plugin.BankState.Loan.Amount != 0)
+		if (Plugin.BankState.Loan.Principal != 0)
 		{
 			LockedNotification(TextElement.Create("You can only have one loan at a time."));
 			Plugin.Logger.LogDebug("local player tried to get a loan when there already was a loan");
 			return;
 		}
 
-		Confirm(
-			GetLoan,
-			TextElement.Create("Are you sure you want to get a loan?")
-		);
+		Loan loan = new(StartOfRound.Instance.gameStats.daysSpent, TimeOfDay.Instance.profitQuota);
+		Confirm(() => GetLoan(loan), TextElement.Create($"Are you sure you want to get a loan for ${loan.Principal}? The total cost will be ${loan.Total}."));
 	}
 
-	private void GetLoan()
+	private void GetLoan(Loan loan)
 	{
-		Loan loan = new(StartOfRound.Instance.gameStats.daysSpent, TimeOfDay.Instance.profitQuota);
 		// update current loan
 		Plugin.BankState.Loan = loan;
 		// sync over network
 		LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
 		updateLoan.SendServer(loan);
-		Plugin.Logger.LogDebug($"took out a loan for {loan.Amount}");
+		Plugin.Logger.LogDebug($"took out a loan for {loan.Principal}");
 		// update quota fulfillment
 		LethalClientMessage<int> syncQuotaFulfilled = new(CreditEvents.SyncQuotaFulfilled);
-		syncQuotaFulfilled.SendServer(loan.Amount);
+		syncQuotaFulfilled.SendServer(loan.Principal);
 
-		LockedNotification(TextElement.Create($"You have successfully taken out a loan for ${loan.Amount}."));
+		LockedNotification(TextElement.Create($"You have successfully taken out a loan for ${loan.Principal}."));
 	}
 }

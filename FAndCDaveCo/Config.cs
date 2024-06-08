@@ -53,6 +53,8 @@ public class Config : SyncedConfig2<Config>
 	[SyncedEntryField] public readonly SyncedEntry<int> PenaltyStartDaysFromIssuance;
 	[SyncedEntryField] public readonly SyncedEntry<double> PenaltyAmount;
 	#endregion
+
+	[SyncedEntryField] public readonly SyncedEntry<double> InterestAmount;
 	#endregion
 	#endregion
 
@@ -181,7 +183,7 @@ public class Config : SyncedConfig2<Config>
 		#region Penalty
 		PenaltyStartDaysFromIssuance = configFile.BindSyncedEntry(
 			new ConfigDefinition("Bank.Loan.Penalty", "StartDaysFromIssuance"),
-			defaultValue: 8,
+			defaultValue: 4,
 			new ConfigDescription("Start of the late penalty in days from the issuance date")
 		);
 		PenaltyAmount = configFile.BindSyncedEntry(
@@ -190,6 +192,12 @@ public class Config : SyncedConfig2<Config>
 			new ConfigDescription("Percent of the credits garnished each day")
 		);
 		#endregion
+
+		InterestAmount = configFile.BindSyncedEntry(
+			new ConfigDefinition("Bank.Loan", "InterestAmount"),
+			defaultValue: 0.05,
+			new ConfigDescription("Percent of the principal added on for interest (only added once)")
+		);
 		#endregion
 		#endregion
 

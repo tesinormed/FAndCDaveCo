@@ -1,7 +1,4 @@
-﻿using LethalModDataLib.Attributes;
-using LethalModDataLib.Base;
-using LethalModDataLib.Enums;
-using tesinormed.FAndCDaveCo.Extensions;
+﻿using LethalModDataLib.Base;
 
 namespace tesinormed.FAndCDaveCo.Bank;
 

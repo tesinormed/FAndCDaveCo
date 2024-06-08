@@ -46,8 +46,8 @@ public static class StartOfRoundPatch
 					deductGroupCredits.SendServer(Plugin.PolicyState.TotalPremium);
 
 					// notify all of the successful renewal
-					LethalServerEvent insuranceRenewalSuccess = new(HUDManagerEvents.InsuranceRenewalSuccessIdentifier);
-					insuranceRenewalSuccess.InvokeAllClients();
+					LethalServerMessage<int> insuranceRenewalSuccess = new(HUDManagerEvents.InsuranceRenewalSuccessIdentifier);
+					insuranceRenewalSuccess.SendAllClients(Plugin.PolicyState.TotalPremium);
 
 					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.PolicyState.TotalPremium}");
 				}
@@ -66,7 +66,7 @@ public static class StartOfRoundPatch
 				}
 			}
 
-			// check if there's an unpaid loan and if it's been more than 8 days
+			// check if there's an unpaid loan and if it's been more than the set amount of days
 			if (Plugin.BankState.Loan.AmountUnpaid > 0 && Plugin.BankState.Loan.DaysSinceIssuance >= Plugin.Config.PenaltyStartDaysFromIssuance)
 			{
 				var amountGarnished = Math.Min(
@@ -94,8 +94,8 @@ public static class StartOfRoundPatch
 				updateLoan.SendServer(Plugin.BankState.Loan);
 
 				// notify all of the credits garnishing
-				LethalServerEvent bankLoanCreditsGarnished = new(HUDManagerEvents.BankLoanCreditsGarnishedIdentifier);
-				bankLoanCreditsGarnished.InvokeAllClients();
+				LethalServerMessage<int> bankLoanCreditsGarnished = new(HUDManagerEvents.BankLoanCreditsGarnishedIdentifier);
+				bankLoanCreditsGarnished.SendAllClients(amountGarnished);
 			}
 		}
 	}

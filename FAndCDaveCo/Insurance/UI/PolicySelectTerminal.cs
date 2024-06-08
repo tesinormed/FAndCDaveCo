@@ -49,7 +49,7 @@ public class PolicySelectTerminal : InteractiveTerminalApplicationExtension
 	{
 		SelectionWithBack(
 			prompt: "Select the coverage amount.",
-			backAction: PreviousScreenAction,
+			backAction: PreviousMainScreenAction,
 			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption00)),
 			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption01)),
 			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption02)),

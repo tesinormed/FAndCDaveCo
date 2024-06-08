@@ -13,11 +13,11 @@ public static class HUDManagerEvents
 
 	public static void Init()
 	{
-		LethalClientEvent insuranceRenewalSuccess = new(InsuranceRenewalSuccessIdentifier, onReceived: () =>
+		LethalClientMessage<int> insuranceRenewalSuccess = new(InsuranceRenewalSuccessIdentifier, onReceived: value =>
 		{
 			HUDManager.Instance.StartCoroutine(DisplayTip(
 				"Insurance renewed",
-				"Please check the terminal for how much has been deducted.",
+				$"${value} has been deducted.",
 				false
 			));
 			Plugin.Logger.LogDebug("displayed insurance renewal success on HUD");
@@ -45,11 +45,11 @@ public static class HUDManagerEvents
 			Plugin.Logger.LogDebug("displayed insurance claim available on HUD");
 		});
 
-		LethalClientEvent bankLoanCreditsGarnished = new(BankLoanCreditsGarnishedIdentifier, onReceived: () =>
+		LethalClientMessage<int> bankLoanCreditsGarnished = new(BankLoanCreditsGarnishedIdentifier, onReceived: value =>
 		{
 			HUDManager.Instance.StartCoroutine(DisplayTip(
 				"Credits garnished",
-				"Due to loan nonpayment, 10% of your credits have been garnished.",
+				$"Due to loan nonpayment, {(int) (Plugin.Config.PenaltyAmount * 100)}% of your credits (${value}) have been garnished.",
 				true
 			));
 			Plugin.Logger.LogDebug("displayed loan credit garnishing warning on HUD");

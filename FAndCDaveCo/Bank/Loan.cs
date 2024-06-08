@@ -10,9 +10,12 @@ public record Loan
 	public int IssuanceDate;
 	[ES3NonSerializable] public int DaysSinceIssuance => StartOfRound.Instance.gameStats.daysSpent - IssuanceDate;
 
-	public int Amount;
+	public int Principal;
+	[ES3NonSerializable] public int Interest => (int) (Principal * Plugin.Config.InterestAmount);
+	[ES3NonSerializable] public int Total => Principal + Interest;
+
 	public int AmountPaid;
-	[ES3NonSerializable] public int AmountUnpaid => Amount - AmountPaid;
+	[ES3NonSerializable] public int AmountUnpaid => Total - AmountPaid;
 
 	public Loan(int issuanceDate, int amount, int amountPaid = 0)
 	{
@@ -21,7 +24,7 @@ public record Loan
 		if (amountPaid < 0) throw new ArgumentOutOfRangeException(nameof(amountPaid), "amount paid cannot be less than zero");
 
 		IssuanceDate = issuanceDate;
-		Amount = amount;
+		Principal = amount;
 		AmountPaid = amountPaid;
 	}
 }

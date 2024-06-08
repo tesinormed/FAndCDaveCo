@@ -13,14 +13,14 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplicationExtension
 	private CursorElement CreateCursorElement(double amount) => CursorElement.Create
 	(
 		name: $"{(int) (amount * 100)}%",
-		action: () => ConfirmPayLoan((int) (Plugin.BankState.Loan.Amount * amount)),
-		active: _ => Plugin.Terminal.groupCredits >= (int) (Plugin.BankState.Loan.Amount * amount),
+		action: () => ConfirmPayLoan((int) (Plugin.BankState.Loan.Total * amount)),
+		active: _ => Plugin.Terminal.groupCredits >= (int) (Plugin.BankState.Loan.Total * amount),
 		selectInactive: true
 	);
 
 	public override void Initialization()
 	{
-		if (Plugin.BankState.Loan.Amount == 0)
+		if (Plugin.BankState.Loan.Principal == 0)
 		{
 			LockedNotification(TextElement.Create("You can only submit a loan payment if you have a loan."));
 			Plugin.Logger.LogDebug("local player tried to submit a loan payment when there was no loan");
@@ -29,10 +29,11 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplicationExtension
 
 		(MainScreen, MainCursorMenu) = Selection(
 			prompt: "Pick an amount to pay towards the loan.",
-			CreateCursorElement(1.00),
 			CreateCursorElement(0.10),
 			CreateCursorElement(0.25),
-			CreateCursorElement(0.50)
+			CreateCursorElement(0.50),
+			CreateCursorElement(0.75),
+			CreateCursorElement(1.00)
 		);
 	}
 

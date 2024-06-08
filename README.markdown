@@ -45,7 +45,8 @@ Thank you to the following people / groups for inspiration, documentation, libra
 - Loan system for when you are short of the quota
 	- Get a loan using the terminal (only one loan may be taken out at a time)
 	- The loan will pay for your quota in full
-	- Pay it off using the terminal within 8 days for no penalty
+	- An interest of 5% will be added to the amount required to be paid back
+	- Pay it off using the terminal within 4 days for no penalty
 	- If you do not pay within that time, 10% of your credits will be garnished each day for loan payments
 
 ## Terminal commands

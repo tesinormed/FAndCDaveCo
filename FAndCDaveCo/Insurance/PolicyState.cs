@@ -2,7 +2,6 @@
 using System.Linq;
 using LethalModDataLib.Attributes;
 using LethalModDataLib.Base;
-using LethalModDataLib.Enums;
 using tesinormed.FAndCDaveCo.Extensions;
 
 namespace tesinormed.FAndCDaveCo.Insurance;
