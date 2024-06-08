@@ -30,7 +30,7 @@ public static class CreditEvents
 			// sync credits
 			Plugin.Terminal.SyncGroupCreditsServerRpc(Plugin.Terminal.groupCredits, Plugin.Terminal.numberOfItemsInDropship);
 
-			Plugin.Logger.LogDebug($"deducted {amount} credits.");
+			Plugin.Logger.LogDebug($"deducted {amount} credits");
 		});
 
 		LethalServerMessage<int> spawnGoldBar = new(SpawnGoldBarIdentifier, onReceived: (value, client) =>
@@ -70,15 +70,17 @@ public static class CreditEvents
 			obj.GetComponent<GrabbableObject>().SetScrapValue(value.Item2);
 		});
 
-		LethalServerMessage<int> syncQuotaFulfilledServer = new(SyncQuotaFulfilled, onReceived: (value, _) =>
+		LethalServerEvent syncQuotaFulfilledServer = new(SyncQuotaFulfilled, onReceived: _ =>
 		{
-			LethalServerMessage<int> syncQuotaFulfilled = new(SyncQuotaFulfilled);
-			syncQuotaFulfilled.SendAllClients(value);
+			TimeOfDay.Instance.quotaFulfilled = TimeOfDay.Instance.profitQuota;
+
+			LethalServerEvent syncQuotaFulfilled = new(SyncQuotaFulfilled);
+			syncQuotaFulfilled.InvokeAllClients();
 		});
 
-		LethalClientMessage<int> syncQuotaFulfilled = new(SyncQuotaFulfilled, onReceived: value =>
+		LethalClientEvent syncQuotaFulfilled = new(SyncQuotaFulfilled, onReceived: () =>
 		{
-			TimeOfDay.Instance.quotaFulfilled = value;
+			TimeOfDay.Instance.quotaFulfilled = TimeOfDay.Instance.profitQuota;
 			TimeOfDay.Instance.UpdateProfitQuotaCurrentTime();
 		});
 	}

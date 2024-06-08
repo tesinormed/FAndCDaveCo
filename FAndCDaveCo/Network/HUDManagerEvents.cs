@@ -17,7 +17,7 @@ public static class HUDManagerEvents
 		{
 			HUDManager.Instance.StartCoroutine(DisplayTip(
 				"Insurance renewed",
-				$"${value} has been deducted.",
+				$"\u25ae{value} has been deducted.",
 				false
 			));
 			Plugin.Logger.LogDebug("displayed insurance renewal success on HUD");
@@ -49,7 +49,7 @@ public static class HUDManagerEvents
 		{
 			HUDManager.Instance.StartCoroutine(DisplayTip(
 				"Credits garnished",
-				$"Due to loan nonpayment, {(int) (Plugin.Config.PenaltyAmount * 100)}% of your credits (${value}) have been garnished.",
+				$"Due to loan nonpayment, {(int) (Plugin.Config.PenaltyAmount * 100)}% of your credits (\u25ae{value}) have been garnished.",
 				true
 			));
 			Plugin.Logger.LogDebug("displayed loan credit garnishing warning on HUD");
