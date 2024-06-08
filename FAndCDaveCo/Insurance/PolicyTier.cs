@@ -1,24 +1,23 @@
 ﻿using System;
 
-namespace tesinormed.FAndCDaveCo.Insurance
-{
-	public enum PolicyTier : byte
-	{
-		NONE,
-		HIGH_DEDUCTIBLE,
-		LOW_DEDUCTIBLE,
-		NO_DEDUCTIBLE
-	}
+namespace tesinormed.FAndCDaveCo.Insurance;
 
-	public static class PolicyTierExtensions
+public enum PolicyTier : byte
+{
+	None,
+	HighDeductible,
+	LowDeductible,
+	NoDeductible
+}
+
+public static class PolicyTierExtensions
+{
+	public static string ToFriendlyString(this PolicyTier policyTier) => policyTier switch
 	{
-		public static string ToFriendlyString(this PolicyTier policyTier) => policyTier switch
-		{
-			PolicyTier.HIGH_DEDUCTIBLE => "Economic",
-			PolicyTier.LOW_DEDUCTIBLE => "Standard",
-			PolicyTier.NO_DEDUCTIBLE => "Bespoke",
-			PolicyTier.NONE => "No Policy?",
-			_ => throw new ArgumentOutOfRangeException(nameof(policyTier), $"unexpected PolicyTier: {policyTier}"),
-		};
-	}
+		PolicyTier.HighDeductible => "Economic",
+		PolicyTier.LowDeductible => "Standard",
+		PolicyTier.NoDeductible => "Bespoke",
+		PolicyTier.None => "No Policy?",
+		_ => throw new ArgumentOutOfRangeException(nameof(policyTier), $"unexpected PolicyTier: {policyTier}")
+	};
 }

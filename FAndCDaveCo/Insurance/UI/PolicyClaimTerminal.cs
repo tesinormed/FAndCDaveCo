@@ -1,134 +1,87 @@
-﻿using InteractiveTerminalAPI.UI;
-using InteractiveTerminalAPI.UI.Application;
+﻿using System.Collections.Generic;
+using System.Linq;
+using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
-using InteractiveTerminalAPI.UI.Screen;
 using LethalNetworkAPI;
-using System.Collections.Generic;
-using tesinormed.FAndCDaveCo.Events;
+using tesinormed.FAndCDaveCo.Extensions;
+using tesinormed.FAndCDaveCo.Network;
 
-namespace tesinormed.FAndCDaveCo.Insurance.UI
+namespace tesinormed.FAndCDaveCo.Insurance.UI;
+
+public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
 {
-	public class PolicyClaimTerminal : InteractiveTerminalApplication
+	protected override string Title => $"{PolicyTerminal.Title}: Make a claim";
+
+	private CursorElement CreateCursorElement(int day, PolicyClaim claim) => CursorElement.Create
+	(
+		name: $"Day {day}: ${claim.Value}",
+		action: () => ConfirmClaim(day, claim),
+		active: _ => true,
+		selectInactive: false
+	);
+
+	public override void Initialization()
 	{
-		private const string TITLE = $"{PolicyTerminal.TITLE}: Make a claim";
-
-		private CursorElement CreateCursorElement(int day, PolicyClaim claim) => CursorElement.Create
-		(
-			name: $"Day {day}: ${claim.Value}",
-			action: () => ConfirmClaim(day, claim),
-			active: (_) => true,
-			selectInactive: false
-		);
-		private IScreen MainScreen { get; set; } = null!;
-		private CursorMenu MainCursorMenu { get; set; } = null!;
-
-		public override void Initialization()
+		// no policy
+		if (Plugin.PolicyState.Policy.Tier == PolicyTier.None)
 		{
-			// no policy
-			if (Plugin.PolicyState.Policy.Tier == PolicyTier.NONE)
-			{
-				SwitchScreen(
-					BoxedScreen.Create(
-						title: TITLE,
-						elements: [TextElement.Create("You do not have an active insurance policy.")]
-					),
-					CursorMenu.Create(startingCursorIndex: 0),
-					previous: false
-				);
-				return;
-			}
-
-			// no claims
-			if (Plugin.PolicyState.UnclaimedClaims.Count == 0)
-			{
-				SwitchScreen(
-					BoxedScreen.Create(
-						title: TITLE,
-						elements: [TextElement.Create("You do not have any claims.")]
-					),
-					CursorMenu.Create(startingCursorIndex: 0),
-					previous: false
-				);
-				return;
-			}
-
-			// make a cursor element for each claim
-			CursorElement[] cursorElements = [];
-			foreach (var pair in Plugin.PolicyState.UnclaimedClaims)
-			{
-				cursorElements = [.. cursorElements, CreateCursorElement(pair.Key, pair.Value)];
-			}
-			var cursorMenu = CursorMenu.Create(startingCursorIndex: 0, elements: cursorElements);
-
-			ITextElement[] textElements =
-			[
-				TextElement.Create("Select a pending claim."),
-				TextElement.Create(" "),
-				cursorMenu,
-			];
-			var screen = BoxedScreen.Create(title: TITLE, elements: textElements);
-
-			MainScreen = screen;
-			MainCursorMenu = cursorMenu;
-			currentScreen = screen;
-			currentCursorMenu = cursorMenu;
-		}
-
-		private void ConfirmClaim(int day, PolicyClaim claim)
-		{
-			var previousScreen = currentScreen;
-			var previousCursorMenu = currentCursorMenu;
-
-			var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
-			var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
-
-			Confirm(
-				title: TITLE,
-				description: $"Are you sure you want to confirm this claim?\nYou will be given back ${payout}.\nYour deductible is ${deductible}.",
-				confirmAction: () => ProcessClaim(day, deductible, payout, claim),
-				declineAction: () => SwitchScreen(previousScreen, previousCursorMenu, previous: true)
-			);
+			LockedNotification(TextElement.Create("You do not have an active insurance policy."));
 			return;
 		}
 
-		private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim)
+		// no claims
+		if (Plugin.PolicyState.UnclaimedClaims.Count == 0)
 		{
-			var previousScreen = currentScreen;
-			var previousCursorMenu = currentCursorMenu;
-
-			// make sure enough credits for deductible
-			if (terminal.groupCredits < deductible)
-			{
-				ErrorMessage(
-					title: TITLE,
-					error: "You do not have enough credits to continue with this claim.",
-					backAction: () => SwitchScreen(MainScreen, MainCursorMenu, previous: true)
-				);
-				return;
-			}
-
-			// set claims
-			Plugin.PolicyState.Claims[day] = new(claim.Value, true);
-			// sync over network
-			LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(identifier: NetworkVariableEvents.UPDATE_CLAIMS_IDENTIFIER);
-			updateClaims.SendServer(Plugin.PolicyState.Claims);
-
-			LethalClientMessage<int> deductGroupCredits = new(identifier: CreditEvents.DEDUCT_GROUP_CREDITS_IDENTIFIER);
-			deductGroupCredits.SendServer(deductible);
-
-			// spawn bar with value of payout
-			LethalClientMessage<int> spawnGoldBar = new(identifier: CreditEvents.SPAWN_GOLD_BAR_IDENTIFIER);
-			spawnGoldBar.SendServer(payout);
-
-			ITextElement[] textElements = [
-				TextElement.Create($"You have been given a gold bar worth ${payout}."),
-				TextElement.Create($"You have been charged ${deductible}."),
-				TextElement.Create($"Your premiums have increased by {(int) (Plugin.PolicyState.FractionalPremiumIncrease * 100)}%."),
-			];
-			var screen = BoxedScreen.Create(title: TITLE, elements: textElements);
-			var cursorMenu = CursorMenu.Create(startingCursorIndex: 0);
-
-			SwitchScreen(screen, cursorMenu, previous: false);
+			LockedNotification(TextElement.Create("You do not have any claims."));
+			return;
 		}
+
+		// make a cursor element for each claim
+		CursorElement[] cursorElements = [];
+		cursorElements = Plugin.PolicyState.UnclaimedClaims.Aggregate(cursorElements, (current, pair) => [.. current, CreateCursorElement(pair.Key, pair.Value)]);
+		(MainScreen, MainCursorMenu) = Selection(prompt: "Select a pending claim.", cursorElements);
+	}
+
+	private void ConfirmClaim(int day, PolicyClaim claim)
+	{
+		var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
+		var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
+
+		Confirm(
+			confirmAction: () => ProcessClaim(day, deductible, payout, claim),
+			declineAction: PreviousScreenAction,
+			TextElement.Create($"Are you sure you want to confirm this claim? You will need to pay a deductible of ${deductible}."),
+			TextElement.Create($"You will be given back ${payout}.")
+		);
+	}
+
+	private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim)
+	{
+		// make sure enough credits for deductible
+		if (terminal.groupCredits < deductible)
+		{
+			Error(backAction: PreviousMainScreenAction, TextElement.Create("You do not have enough credits to continue with this claim."));
+			return;
+		}
+
+		// set claims
+		Plugin.PolicyState.Claims[day] = new(claim.Value, claimed: true);
+		// sync over network
+		LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(NetworkVariableEvents.UpdateClaimsIdentifier);
+		updateClaims.SendServer(Plugin.PolicyState.Claims);
+
+		// deduct credits
+		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
+		deductGroupCredits.SendServer(deductible);
+
+		// spawn bar with value of payout
+		LethalClientMessage<int> spawnGoldBar = new(CreditEvents.SpawnGoldBarIdentifier);
+		spawnGoldBar.SendServer(payout);
+
+		LockedNotification(
+			TextElement.Create($"You have been given a gold bar worth ${payout}."),
+			TextElement.Create($"You have been charged ${deductible}."),
+			TextElement.Create($"Your premiums have increased by {(int) (Plugin.PolicyState.FractionalPremiumIncrease * 100)}%.")
+		);
 	}
 }

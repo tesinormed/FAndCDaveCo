@@ -23,29 +23,30 @@ Thank you to the following people / groups for inspiration, documentation, libra
 
 ## Features
 
+- Configurable values: if you don't like these numbers, you can change them
 - Insurance for when everyone dies and you lose your loot
 	- Get an insurance policy using the terminal
 		- You will be charged for the initial payment
 		- Tier options are Economic, Standard, and Bespoke
 			- Economic
-				- Base premium is 10% of the coverage
-				- Deductible is 30% with a minimum of 20% of the coverage and a maximum of 50% of the coverage
+				- Base premium is 7% of the coverage
+				- Deductible is 25% with a minimum of 15% of the coverage and a maximum of 60% of the coverage
 			- Standard
-				- Base premium is 20% of the coverage
-				- Deductible is 15% with a minimum of 10% of the coverage and a maximum of 25% of the coverage
+				- Base premium is 15% of the coverage
+				- Deductible is 10% with a minimum of 10% of the coverage and a maximum of 30% of the coverage
 			- Bespoke
 				- Base premium is 35% of the coverage
 				- No deductibles
-			- **Premium will increase by 15% every time it is used, up to 75%**
-		- Coverage options are $300, $650, $1500, $2750, $5000, $10000
+			- **Premium will increase by 25% every time it is used, based on usage within the past 10 days**
+		- Coverage options are ▮150, ▮400, ▮800, ▮1500, ▮2250, ▮3600, ▮5500, ▮8000, ▮11125, ▮15250, ▮18000
 	- Make a claim using the terminal when you lose all your loot due to full crew death
-		- You must pay the deductible if your policy tier requires it.
-		- A gold bar with the value of the lost scrap (or policy coverage, if over it) will be given to you
-- Loan system when you are short of the quota (**not implemented**)
-	- Get a loan using the terminal
-	- Pay it off within 5 days for no penalty
-	- Pay it off within 10 days with quota penalty (increased quota)
-	- Greater than 10 days results in termination
+		- You must pay the deductible if your policy tier requires it
+		- A gold bar with the value of the lost scrap (maximum is the coverage amount) will be given to you
+- Loan system for when you are short of the quota
+	- Get a loan using the terminal (only one loan may be taken out at a time)
+	- The loan will pay for your quota in full
+	- Pay it off using the terminal within 8 days for no penalty
+	- If you do not pay within that time, 10% of your credits will be garnished each day for loan payments
 
 ## Terminal commands
 
@@ -53,16 +54,26 @@ Thank you to the following people / groups for inspiration, documentation, libra
 
 - `insurance info`, `insurance information`, `insurance policy`
 	- Get information on the current insurance policy
-- `insurance select`, `insurance configure`
+- `insurance select`, `insurance get`
 	- Select a new insurance policy
 - `insurance claim`, `insurance claims`, `insurance make claim`
 	- Confirm an insurance claim
 	- You must have a insurance policy
 	- Look below you for the gold bar
 
-### Banking (**not implemented**)
+### Bank
 
-- `bank loan select`, `bank loan`
-	- Select a loan to take out
-- `bank loan list`, `bank loan info`, `bank loans`
-	- List current unpaid loans
+- `bank loan info`, `bank loan information`
+	- Get information on the current loan
+	- You must have an unpaid loan
+- `bank loan get`, `bank loan`
+	- Get a loan covering your current quota
+	- You must not have an unpaid loan
+- `bank loan pay`, `bank loan payment`
+	- Pay the current loan off
+	- Can either be in full or only a specific percent of the loan amount
+	- You must have an unpaid loan
+
+## Contact
+
+Please use the [GitHub issue tracker](https://github.com/tesinormed/FAndCDaveCo) for any issues, requests, or inquiries.

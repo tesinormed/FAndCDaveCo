@@ -1,7 +1,6 @@
-﻿namespace tesinormed.FAndCDaveCo.Insurance.UI
+﻿namespace tesinormed.FAndCDaveCo.Insurance.UI;
+
+internal static class PolicyTerminal
 {
-	internal static class PolicyTerminal
-	{
-		internal const string TITLE = "F&C Dave Co. Insurance";
-	}
+	internal const string Title = "F&C Dave Co. Insurance";
 }

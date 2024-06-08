@@ -1,12 +1,14 @@
 {
     "name": "FAndCDaveCo",
-    "description": "Adds an insurance and loan system.",
+    "description": "Adds an insurance system and a loan system.",
     "version_number": "1.0.0",
     "website_url": "https://github.com/tesinormed/FAndCDaveCo",
     "dependencies": [
+		"BepInEx-BepInExPack-5.4.2100",
 		"BMX-LobbyCompatibility-1.1.0",
 		"WhiteSpike-Interactive_Terminal_API-1.1.2",
 		"MaxWasUnavailable-LethalModDataLib-1.2.2",
-		"xilophor-LethalNetworkAPI-2.1.7"
+		"xilophor-LethalNetworkAPI-2.1.7",
+		"Sigurd-CSync-5.0.1"
     ]
 }

@@ -1,19 +1,18 @@
 ﻿using System;
 
-namespace tesinormed.FAndCDaveCo.Insurance
+namespace tesinormed.FAndCDaveCo.Insurance;
+
+[ES3Serializable]
+public record PolicyClaim
 {
-	[ES3Serializable]
-	public record PolicyClaim
+	public readonly bool Claimed;
+	public readonly int Value;
+
+	public PolicyClaim(int value, bool claimed = false)
 	{
-		public readonly int Value;
-		public readonly bool Claimed;
+		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "value cannot be less than zero");
 
-		public PolicyClaim(int value, bool claimed = false)
-		{
-			if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), $"value cannot be less than zero");
-
-			Value = value;
-			Claimed = claimed;
-		}
+		Value = value;
+		Claimed = claimed;
 	}
 }

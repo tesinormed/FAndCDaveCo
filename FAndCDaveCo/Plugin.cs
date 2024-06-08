@@ -1,133 +1,139 @@
+using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using InteractiveTerminalAPI.UI;
 using LethalModDataLib.Events;
 using LethalNetworkAPI;
 using LobbyCompatibility.Attributes;
 using LobbyCompatibility.Enums;
-using System.Collections.Generic;
-using tesinormed.FAndCDaveCo.Banking;
-using tesinormed.FAndCDaveCo.Banking.UI;
-using tesinormed.FAndCDaveCo.Events;
+using tesinormed.FAndCDaveCo.Bank;
+using tesinormed.FAndCDaveCo.Bank.UI;
+using tesinormed.FAndCDaveCo.Extensions;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Insurance.UI;
+using tesinormed.FAndCDaveCo.Network;
 
-namespace tesinormed.FAndCDaveCo
+namespace tesinormed.FAndCDaveCo;
+
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("BMX.LobbyCompatibility")]
+[BepInDependency("WhiteSpike.InteractiveTerminalAPI")]
+[BepInDependency("MaxWasUnavailable.LethalModDataLib")]
+[BepInDependency("LethalNetworkAPI")]
+[BepInDependency("com.sigurd.csync", "5.0.0")]
+[LobbyCompatibility(CompatibilityLevel.Everyone, VersionStrictness.Minor)]
+public class Plugin : BaseUnityPlugin
 {
-	[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-	[BepInDependency("BMX.LobbyCompatibility")]
-	[BepInDependency("WhiteSpike.InteractiveTerminalAPI")]
-	[BepInDependency("MaxWasUnavailable.LethalModDataLib")]
-	[BepInDependency("LethalNetworkAPI")]
-	[LobbyCompatibility(CompatibilityLevel.Everyone, VersionStrictness.Minor)]
-	public class Plugin : BaseUnityPlugin
+	internal new static ManualLogSource Logger { get; private set; } = null!;
+	public static Plugin Instance { get; private set; } = null!;
+	internal new static Config Config { get; private set; } = null!;
+
+	internal static Harmony? Harmony { get; set; }
+
+	public static Terminal Terminal { get; set; } = null!;
+
+	public static PolicyState PolicyState { get; private set; } = null!;
+	public static readonly LethalNetworkVariable<Policy> SyncedPolicy = new(nameof(PolicyState.Policy));
+	public static readonly LethalNetworkVariable<Dictionary<int, PolicyClaim>> SyncedClaims = new(nameof(PolicyState.Claims));
+
+	public static BankState BankState { get; private set; } = null!;
+	public static readonly LethalNetworkVariable<Loan> SyncedLoan = new(nameof(BankState.Loan));
+
+	private void Awake()
 	{
-		public static Plugin Instance { get; private set; } = null!;
-		internal new static ManualLogSource Logger { get; private set; } = null!;
-		internal static Harmony? Harmony { get; set; }
-		public static Terminal Terminal { get; set; } = null!;
+		Logger = base.Logger;
+		Instance = this;
+		Config = new Config(base.Config);
 
-		public static PolicyState PolicyState { get; private set; } = null!;
-		public static LethalNetworkVariable<Policy> SyncedPolicy = new(identifier: PolicyState.POLICY_NETWORK_IDENTIFIER);
-		public static LethalNetworkVariable<Dictionary<int, PolicyClaim>> SyncedClaims = new(identifier: PolicyState.CLAIMS_NETWORK_IDENTIFIER);
+		InitNetworkVariables();
+		InitState();
+		RegisterTerminal();
+		NetworkVariableEvents.Init();
+		CreditEvents.Init();
+		HUDManagerEvents.Init();
 
-		public static BankState BankState { get; private set; } = null!;
-		public static LethalNetworkVariable<Dictionary<int, Loan>> SyncedLoans = new(identifier: BankState.LOANS_NETWORK_IDENTIFIER);
+		Patch();
 
-		private void Awake()
+		Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} ({MyPluginInfo.PLUGIN_NAME}) version {MyPluginInfo.PLUGIN_VERSION} loaded");
+	}
+
+	private void InitNetworkVariables()
+	{
+		SyncedPolicy.OnValueChanged += data =>
 		{
-			Logger = base.Logger;
-			Instance = this;
-
-			InitNetworkVariables();
-			InitState();
-			RegisterTerminal();
-			NetworkVariableEvents.Init();
-			CreditEvents.Init();
-			HUDManagerEvents.Init();
-
-			Patch();
-
-			Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
-		}
-
-		private void InitNetworkVariables()
+			PolicyState.Policy = data;
+			Logger.LogDebug($"synced policy state policy {data}");
+		};
+		SyncedClaims.OnValueChanged += data =>
 		{
-			SyncedPolicy.OnValueChanged += (data) =>
-			{
-				PolicyState.Policy = data;
-				Logger.LogDebug($"synced policy state policy {data}");
-			};
-			SyncedClaims.OnValueChanged += (data) =>
-			{
-				PolicyState.Claims = data;
-				Logger.LogDebug($"synced policy state claims {data}");
-			};
+			PolicyState.Claims = data;
+			Logger.LogDebug($"synced policy state claims {data}");
+		};
+		SyncedLoan.OnValueChanged += data =>
+		{
+			BankState.Loan = data;
+			Logger.LogDebug($"synced bank state loan {data}");
+		};
+	}
 
-			SyncedLoans.OnValueChanged += (data) =>
-			{
-				BankState.Loans = data;
-				Logger.LogDebug($"synced bank state loans {data}");
-			};
-		}
-		private void InitState()
+	private void InitState()
+	{
+		PolicyState = new();
+		BankState = new();
+
+		SaveLoadEvents.PostSaveGameEvent += (_, _) =>
+		{
+			PolicyState.Save();
+			BankState.Save();
+		};
+		SaveLoadEvents.PostLoadGameEvent += (_, _) =>
+		{
+			PolicyState.Load();
+			BankState.Load();
+		};
+		SaveLoadEvents.PostDeleteSaveEvent += _ =>
+		{
+			PolicyState = new();
+			BankState = new();
+		};
+		SaveLoadEvents.PostResetSavedGameValuesEvent += () =>
 		{
 			PolicyState = new();
 			BankState = new();
 
-			SaveLoadEvents.PostSaveGameEvent += (_, _) =>
-			{
-				PolicyState.Save();
-				BankState.Save();
-			};
-			SaveLoadEvents.PostLoadGameEvent += (_, _) =>
-			{
-				PolicyState.Load();
-				BankState.Load();
-			};
-			SaveLoadEvents.PostDeleteSaveEvent += (_) =>
-			{
-				PolicyState.Reset();
-				BankState.Reset();
-			};
-			SaveLoadEvents.PostResetSavedGameValuesEvent += () =>
-			{
-				PolicyState.Reset();
-				BankState.Reset();
+			PolicyState.Save();
+			BankState.Save();
+		};
+	}
 
-				PolicyState.Save();
-				BankState.Save();
-			};
-		}
+	private void RegisterTerminal()
+	{
+		InteractiveTerminalManagerExtensions.RegisterApplication<PolicyInformationTerminal>("insurance info", "insurance information", "insurance policy");
+		InteractiveTerminalManagerExtensions.RegisterApplication<PolicySelectTerminal>("insurance select", "insurance get");
+		InteractiveTerminalManagerExtensions.RegisterApplication<PolicyClaimTerminal>("insurance claim", "insurance claims", "insurance make claim");
 
-		private void RegisterTerminal()
-		{
-			InteractiveTerminalManager.RegisterApplication<PolicyInformationTerminal>(["insurance info", "insurance information", "insurance policy"]);
-			InteractiveTerminalManager.RegisterApplication<PolicySelectTerminal>(["insurance select", "insurance configure"]);
-			InteractiveTerminalManager.RegisterApplication<PolicyClaimTerminal>(["insurance claim", "insurance claims", "insurance make claim"]);
+		InteractiveTerminalManagerExtensions.RegisterApplication<BankLoanInformationTerminal>("bank loan info", "bank loan information");
+		InteractiveTerminalManagerExtensions.RegisterApplication<BankLoanGetTerminal>("bank loan get", "bank loan");
+		InteractiveTerminalManagerExtensions.RegisterApplication<BankLoanPaymentTerminal>("bank loan pay", "bank loan payment");
+	}
 
-			InteractiveTerminalManager.RegisterApplication<BankLoanListTerminal>(["bank loan list", "bank loan info", "bank loans"]);
-		}
+	internal static void Patch()
+	{
+		Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
 
-		internal static void Patch()
-		{
-			Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
+		Logger.LogDebug("Patching...");
 
-			Logger.LogDebug("Patching...");
+		Harmony.PatchAll();
 
-			Harmony.PatchAll();
+		Logger.LogDebug("Finished patching!");
+	}
 
-			Logger.LogDebug("Finished patching!");
-		}
+	internal static void Unpatch()
+	{
+		Logger.LogDebug("Unpatching...");
 
-		internal static void Unpatch()
-		{
-			Logger.LogDebug("Unpatching...");
+		Harmony?.UnpatchSelf();
 
-			Harmony?.UnpatchSelf();
-
-			Logger.LogDebug("Finished unpatching!");
-		}
+		Logger.LogDebug("Finished unpatching!");
 	}
 }

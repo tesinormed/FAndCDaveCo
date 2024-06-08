@@ -1,64 +1,35 @@
-﻿using InteractiveTerminalAPI.UI;
-using InteractiveTerminalAPI.UI.Application;
+﻿using System.Collections.Generic;
+using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Screen;
-using System;
+using tesinormed.FAndCDaveCo.Extensions;
 
-namespace tesinormed.FAndCDaveCo.Insurance.UI
+namespace tesinormed.FAndCDaveCo.Insurance.UI;
+
+public class PolicyInformationTerminal : TerminalApplicationExtension
 {
-	public class PolicyInformationTerminal : TerminalApplication
+	public override void Initialization()
 	{
-		private const string TITLE = $"{PolicyTerminal.TITLE}: Policy information";
-
-		public override void Initialization()
+		List<ITextElement> textElements = [];
+		if (Plugin.PolicyState.Policy.Tier == PolicyTier.None)
 		{
-			ITextElement[] textElements;
-			if (Plugin.PolicyState.Policy.Tier == PolicyTier.NONE)
-			{
-				textElements = [TextElement.Create($"You do not currently have a policy with {PolicyTerminal.TITLE}.")];
-			}
-			else
-			{
-				textElements = [
-					TextElement.Create($"You currently have the {Plugin.PolicyState.Policy.Tier.ToFriendlyString()} policy (${Plugin.PolicyState.Policy.Coverage})."),
-					TextElement.Create($"You have made {Plugin.PolicyState.ClaimedClaims.Count} claims recently (within 5 days)."),
-				];
+			textElements.Add(TextElement.Create($"You do not currently have a policy with {PolicyTerminal.Title}."));
+		}
+		else
+		{
+			textElements.Add(TextElement.Create($"You currently have the {Plugin.PolicyState.Policy.Tier.ToFriendlyString()} policy (${Plugin.PolicyState.Policy.Coverage})."));
+			textElements.Add(TextElement.Create($"You have made {Plugin.PolicyState.ClaimedClaims.Count} claims recently (within {Plugin.Config.ClaimRetentionDays.Value} days)."));
+			textElements.Add(Plugin.PolicyState.FractionalPremiumIncrease == 0.00
+				? TextElement.Create($"You pay ${Plugin.PolicyState.TotalPremium} per day.")
+				// show only if premium is increased
+				: TextElement.Create($"You pay ${Plugin.PolicyState.TotalPremium} (+{(int) (Plugin.PolicyState.FractionalPremiumIncrease * 100)}%) per day."));
 
-				if (Plugin.PolicyState.FractionalPremiumIncrease == 0.00)
-				{
-					textElements = [.. textElements, TextElement.Create($"You pay ${Plugin.PolicyState.TotalPremium} per day.")];
-				}
-				// show only if increased premium
-				else
-				{
-					textElements =
-					[
-						.. textElements,
-						TextElement.Create($"You pay ${Plugin.PolicyState.TotalPremium} (+{(int) (Plugin.PolicyState.FractionalPremiumIncrease * 100)}%) per day."),
-					];
-				}
-
-				// show only if has deductible
-				if (Plugin.PolicyState.Policy.DeductiblePercent == 0.00)
-				{
-					textElements = [.. textElements, TextElement.Create("You do not pay deductibles.")];
-				}
-				else
-				{
-					textElements =
-					[
-						.. textElements,
-						TextElement.Create($"Your deductible is currently {(int) (Plugin.PolicyState.Policy.DeductiblePercent * 100)}%."),
-						TextElement.Create($"Your deductible has a minimum of ${Plugin.PolicyState.Policy.DeductibleMinimum} and a maximum of ${Plugin.PolicyState.Policy.DeductibleMaximum}."),
-					];
-				}
-			}
-			var screen = BoxedScreen.Create(title: TITLE, elements: textElements);
-
-			currentScreen = screen;
+			// show only if there is a deductible
+			textElements.Add(Plugin.PolicyState.Policy.DeductiblePercent != 0.00
+				? TextElement.Create($"Your deductible is currently {(int) (Plugin.PolicyState.Policy.DeductiblePercent * 100)}% (minimum: ${Plugin.PolicyState.Policy.DeductibleMinimum}, maximum: ${Plugin.PolicyState.Policy.DeductibleMaximum}).")
+				: TextElement.Create("You do not pay deductibles."));
 		}
 
-		protected override string GetApplicationText() => currentScreen.GetText(51);
-
-		protected override Action PreviousScreen() => () => { };
+		var screen = BoxedScreen.Create($"{PolicyTerminal.Title}: Policy information", textElements.ToArray());
+		currentScreen = screen;
 	}
 }
