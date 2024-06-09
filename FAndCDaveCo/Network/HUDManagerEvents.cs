@@ -68,6 +68,7 @@ public static class HUDManagerEvents
 
 			if (index == 0) yield return new WaitForSeconds(3F);
 			tip.Invoke();
+			Plugin.Logger.LogDebug("displayed queued HUD tip");
 			yield return new WaitForSeconds(7.5F);
 		}
 

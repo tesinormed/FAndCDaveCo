@@ -123,19 +123,19 @@ public class Plugin : BaseUnityPlugin
 	{
 		Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
 
-		Logger.LogDebug("Patching...");
+		Logger.LogDebug("patching in progress");
 
 		Harmony.PatchAll();
 
-		Logger.LogDebug("Finished patching!");
+		Logger.LogDebug("finished patching");
 	}
 
 	internal static void Unpatch()
 	{
-		Logger.LogDebug("Unpatching...");
+		Logger.LogDebug("unpatching in progress");
 
 		Harmony?.UnpatchSelf();
 
-		Logger.LogDebug("Finished unpatching!");
+		Logger.LogDebug("finished unpatching");
 	}
 }
