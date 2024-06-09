@@ -74,7 +74,7 @@ public static class StartOfRoundPatch
 					Plugin.BankState.Loan.AmountUnpaid
 				);
 
-				// garnish 10% of credits
+				// credit garnishment
 				LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
 				deductGroupCredits.SendServer(amountGarnished);
 				Plugin.Logger.LogDebug($"garnished ${amountGarnished} from group credits due to loan nonpayment");
