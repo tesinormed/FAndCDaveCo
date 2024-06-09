@@ -19,7 +19,7 @@ public static class CreditEvents
 		LethalServerMessage<int> deductGroupCredits = new(DeductGroupCreditsIdentifier, onReceived: (amount, _) =>
 		{
 			// make sure credits won't be negative
-			if (Plugin.Terminal.groupCredits - amount < 0)
+			if (Plugin.Terminal.groupCredits < amount)
 			{
 				Plugin.Logger.LogError($"could not deduct {amount} credits; balance would be under 0");
 				return;
