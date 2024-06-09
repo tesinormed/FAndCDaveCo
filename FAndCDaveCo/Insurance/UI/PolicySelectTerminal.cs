@@ -69,14 +69,14 @@ public class PolicySelectTerminal : InteractiveTerminalApplicationExtension
 		// make sure policy is not the same as the current one
 		if (state.Policy == Plugin.PolicyState.Policy)
 		{
-			Error(backAction: PreviousScreenAction, TextElement.Create("You already have this policy."));
+			Notification(backAction: PreviousScreenAction, TextElement.Create("You already have this policy."));
 			return;
 		}
 
 		// make sure enough credits for initial premium payment
 		if (terminal.groupCredits < state.TotalPremium)
 		{
-			Error(backAction: PreviousScreenAction, TextElement.Create("You do not have enough credits to purchase this policy."));
+			Notification(backAction: PreviousScreenAction, TextElement.Create("You do not have enough credits to purchase this policy."));
 			return;
 		}
 

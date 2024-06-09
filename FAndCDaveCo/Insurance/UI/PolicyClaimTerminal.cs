@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
@@ -14,7 +15,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
 
 	private CursorElement CreateCursorElement(int day, PolicyClaim claim) => CursorElement.Create
 	(
-		name: $"Day {day}: ${claim.Value}",
+		name: $"Day {day + 1}: ${claim.Value}",
 		action: () => ConfirmClaim(day, claim),
 		active: _ => true,
 		selectInactive: false
@@ -49,10 +50,30 @@ public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
 
 		Confirm(
 			confirmAction: () => ProcessClaim(day, deductible, payout, claim),
-			declineAction: PreviousScreenAction,
+			declineAction: () => ConfirmDeleteClaim(day),
 			TextElement.Create($"Are you sure you want to confirm this claim? You will need to pay a deductible of ${deductible}."),
 			TextElement.Create($"You will be given back ${payout}.")
 		);
+	}
+
+	private void ConfirmDeleteClaim(int day)
+	{
+		Confirm(
+			confirmAction: () => DeleteClaim(day),
+			declineAction: PreviousMainScreenAction,
+			TextElement.Create($"Do you want to delete this claim for day {day}?")
+		);
+	}
+
+	private void DeleteClaim(int day)
+	{
+		// delete claim
+		Plugin.PolicyState.Claims.Remove(day);
+		// sync over network
+		LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(NetworkVariableEvents.UpdateClaimsIdentifier);
+		updateClaims.SendServer(Plugin.PolicyState.Claims);
+
+		Notification(backAction: PreviousMainScreenAction, TextElement.Create($"The claim for day {day} has been deleted."));
 	}
 
 	private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim)
@@ -60,7 +81,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
 		// make sure enough credits for deductible
 		if (terminal.groupCredits < deductible)
 		{
-			Error(backAction: PreviousMainScreenAction, TextElement.Create("You do not have enough credits to continue with this claim."));
+			Notification(backAction: PreviousMainScreenAction, TextElement.Create("You do not have enough credits to continue with this claim."));
 			return;
 		}
 

@@ -27,15 +27,11 @@ public static class RoundManagerPatch
 			if (lootValue > 0)
 			{
 				// update claims
-				Plugin.PolicyState.Claims[StartOfRound.Instance.gameStats.daysSpent] = new(lootValue);
+				Plugin.PolicyState.Claims[StartOfRound.Instance.gameStats.daysSpent - 1] = new(lootValue);
 				// sync over network
 				Plugin.SyncedClaims.Value = Plugin.PolicyState.Claims;
 
-				Plugin.Logger.LogInfo($"crew all dead, recording pending claim with value of {lootValue} for day {StartOfRound.Instance.gameStats.daysSpent}");
-
-				// notify crew of pending insurance claim
-				LethalServerEvent insuranceClaimAvailable = new(HUDManagerEvents.InsuranceClaimAvailableIdentifier);
-				insuranceClaimAvailable.InvokeAllClients();
+				Plugin.Logger.LogInfo($"crew all dead, recording pending claim with value of {lootValue} for day {StartOfRound.Instance.gameStats.daysSpent - 1}");
 			}
 		}
 	}

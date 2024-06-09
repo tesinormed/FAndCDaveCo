@@ -6,6 +6,7 @@ using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Bank;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Network;
+using UnityEngine;
 
 namespace tesinormed.FAndCDaveCo.Patches;
 
@@ -50,6 +51,14 @@ public static class StartOfRoundPatch
 					insuranceRenewalSuccess.SendAllClients(Plugin.PolicyState.TotalPremium);
 
 					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.PolicyState.TotalPremium}");
+
+					if (Plugin.PolicyState.Claims.ContainsKey(StartOfRound.Instance.gameStats.daysSpent - 1))
+					{
+						yield return new WaitForSeconds(3);
+						// notify crew of pending insurance claim
+						LethalServerEvent insuranceClaimAvailable = new(HUDManagerEvents.InsuranceClaimAvailableIdentifier);
+						insuranceClaimAvailable.InvokeAllClients();
+					}
 				}
 				else
 				{
@@ -93,6 +102,7 @@ public static class StartOfRoundPatch
 				LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
 				updateLoan.SendServer(Plugin.BankState.Loan);
 
+				yield return new WaitForSeconds(3);
 				// notify all of the credits garnishing
 				LethalServerMessage<int> bankLoanCreditsGarnished = new(HUDManagerEvents.BankLoanCreditsGarnishedIdentifier);
 				bankLoanCreditsGarnished.SendAllClients(amountGarnished);

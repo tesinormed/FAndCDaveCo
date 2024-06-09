@@ -5,8 +5,8 @@ namespace tesinormed.FAndCDaveCo.Insurance;
 [ES3Serializable]
 public record PolicyClaim
 {
-	public readonly bool Claimed;
-	public readonly int Value;
+	public bool Claimed;
+	public int Value;
 
 	public PolicyClaim(int value, bool claimed = false)
 	{

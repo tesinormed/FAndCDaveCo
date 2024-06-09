@@ -93,7 +93,7 @@ public abstract class InteractiveTerminalApplicationExtension : InteractiveTermi
 		SwitchScreen(screen, cursorMenu, previous: false);
 	}
 
-	protected void Error(Action backAction, params ITextElement[] text)
+	protected void Notification(Action backAction, params ITextElement[] text)
 	{
 		var cursorMenu = CursorMenu.Create(elements:
 		[

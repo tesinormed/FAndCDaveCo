@@ -41,7 +41,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplicationExtension
 	{
 		if (Plugin.Terminal.groupCredits < amount)
 		{
-			Error(backAction: PreviousScreenAction, TextElement.Create($"You do not have enough credits to submit a payment of ${amount} for the loan."));
+			Notification(backAction: PreviousScreenAction, TextElement.Create($"You do not have enough credits to submit a payment of ${amount} for the loan."));
 			return;
 		}
 

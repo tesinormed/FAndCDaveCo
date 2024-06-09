@@ -17,7 +17,7 @@ public class PolicyInformationTerminal : TerminalApplicationExtension
 		else
 		{
 			textElements.Add(TextElement.Create($"You currently have the {Plugin.PolicyState.Policy.Tier.ToFriendlyString()} policy (${Plugin.PolicyState.Policy.Coverage})."));
-			textElements.Add(TextElement.Create($"You have made {Plugin.PolicyState.ClaimedClaims.Count} claims recently (within {Plugin.Config.ClaimRetentionDays.Value} days)."));
+			textElements.Add(TextElement.Create($"You have made {Plugin.PolicyState.ClaimedClaims.Count} claim(s) recently (within {Plugin.Config.ClaimRetentionDays.Value} days)."));
 			textElements.Add(Plugin.PolicyState.FractionalPremiumIncrease == 0.00
 				? TextElement.Create($"You pay ${Plugin.PolicyState.TotalPremium} per day.")
 				// show only if premium is increased
