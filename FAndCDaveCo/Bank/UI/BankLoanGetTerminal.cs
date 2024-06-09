@@ -20,7 +20,7 @@ public class BankLoanGetTerminal : InteractiveTerminalApplication
 
 		if (StartOfRound.Instance.isChallengeFile)
 		{
-			LockedNotification(TextElement.Create("You cannot get a loan while doing the challenge moon."));
+			LockedNotification(TextElement.Create("You cannot get a loan while doing a challenge moon."));
 			Plugin.Logger.LogDebug("local player tried to get a loan while doing a challenge moon");
 			return;
 		}
