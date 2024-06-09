@@ -12,7 +12,7 @@ public class PolicyInformationTerminal : TerminalApplication
 		List<ITextElement> textElements = [];
 		if (Plugin.PolicyState.Policy.Tier == PolicyTier.None)
 		{
-			textElements.Add(TextElement.Create($"You do not currently have a policy with {PolicyTerminal.Title}."));
+			textElements.Add(TextElement.Create($"You do not currently have an insurance policy."));
 		}
 		else
 		{
