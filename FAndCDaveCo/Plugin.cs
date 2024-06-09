@@ -95,13 +95,13 @@ public class Plugin : BaseUnityPlugin
 		{
 			PolicyState = new();
 			BankState = new();
-			HUDManagerEvents.QueuedHudTips.RemoveAll(_ => true);
+			HUDManagerEvents.QueuedHudTips.Clear();
 		};
 		SaveLoadEvents.PostResetSavedGameValuesEvent += () =>
 		{
 			PolicyState = new();
 			BankState = new();
-			HUDManagerEvents.QueuedHudTips.RemoveAll(_ => true);
+			HUDManagerEvents.QueuedHudTips.Clear();
 
 			PolicyState.Save();
 			BankState.Save();

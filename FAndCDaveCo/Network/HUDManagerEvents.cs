@@ -71,6 +71,6 @@ public static class HUDManagerEvents
 			yield return new WaitForSeconds(7.5F);
 		}
 
-		QueuedHudTips.RemoveAll(_ => true);
+		QueuedHudTips.Clear();
 	}
 }
