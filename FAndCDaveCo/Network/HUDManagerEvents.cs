@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using LethalNetworkAPI;
 using UnityEngine;
 
@@ -10,55 +12,65 @@ public static class HUDManagerEvents
 	public const string InsuranceRenewalFailIdentifier = "InsuranceRenewalFail";
 	public const string InsuranceClaimAvailableIdentifier = "ClaimAvailable";
 	public const string BankLoanCreditsGarnishedIdentifier = "BankLoanCreditsGarnished";
+	public const string RunQueuedHudTipsIdentifier = "RunQueuedHudTips";
+
+	internal static readonly List<Action> QueuedHudTips = [];
 
 	public static void Init()
 	{
 		LethalClientMessage<int> insuranceRenewalSuccess = new(InsuranceRenewalSuccessIdentifier, onReceived: value =>
 		{
-			HUDManager.Instance.StartCoroutine(DisplayTip(
+			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Insurance renewed",
 				$"\u25ae{value} has been deducted.",
-				false
+				isWarning: false
 			));
-			Plugin.Logger.LogDebug("displayed insurance renewal success on HUD");
+			Plugin.Logger.LogDebug("queued insurance renewal success on HUD");
 		});
-		LethalClientEvent insuranceRenewalFail = new(
-			InsuranceRenewalFailIdentifier,
-			() =>
-			{
-				HUDManager.Instance.StartCoroutine(DisplayTip(
-					"Insurance canceled",
-					"You do not have sufficient credits.",
-					true
-				));
-				Plugin.Logger.LogDebug("displayed insurance renewal fail on HUD");
-			}
-		);
+		LethalClientEvent insuranceRenewalFail = new(InsuranceRenewalFailIdentifier, onReceived: () =>
+		{
+			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
+				"Insurance canceled",
+				"You do not have sufficient credits.",
+				isWarning: true
+			));
+			Plugin.Logger.LogDebug("queued insurance renewal fail on HUD");
+		});
 
 		LethalClientEvent insuranceClaimAvailable = new(InsuranceClaimAvailableIdentifier, onReceived: () =>
 		{
-			HUDManager.Instance.StartCoroutine(DisplayTip(
+			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Insurance claim",
 				"Confirm the pending claim at the terminal.",
-				false
+				isWarning: false
 			));
-			Plugin.Logger.LogDebug("displayed insurance claim available on HUD");
+			Plugin.Logger.LogDebug("queued insurance claim available on HUD");
 		});
 
 		LethalClientMessage<int> bankLoanCreditsGarnished = new(BankLoanCreditsGarnishedIdentifier, onReceived: value =>
 		{
-			HUDManager.Instance.StartCoroutine(DisplayTip(
+			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Credits garnished",
 				$"Due to loan nonpayment, {(int) (Plugin.Config.PenaltyAmount * 100)}% of your credits (\u25ae{value}) have been garnished.",
-				true
+				isWarning: true
 			));
-			Plugin.Logger.LogDebug("displayed loan credit garnishing warning on HUD");
+			Plugin.Logger.LogDebug("queued loan credit garnishing warning on HUD");
 		});
+
+		LethalClientEvent runQueuedHudTips = new(RunQueuedHudTipsIdentifier, onReceived: () => { HUDManager.Instance.StartCoroutine(RunQueuedHudTips()); });
 	}
 
-	private static IEnumerator DisplayTip(string headerText, string bodyText, bool isWarning)
+	private static IEnumerator RunQueuedHudTips()
 	{
-		yield return new WaitForSeconds(3);
-		HUDManager.Instance.DisplayTip(headerText, bodyText, isWarning);
+		for (var index = 0; index < QueuedHudTips.Count; index++)
+		{
+			var tip = QueuedHudTips[index];
+
+			if (index == 0) yield return new WaitForSeconds(3F);
+			tip.Invoke();
+			yield return new WaitForSeconds(7.5F);
+		}
+
+		QueuedHudTips.RemoveAll(_ => true);
 	}
 }

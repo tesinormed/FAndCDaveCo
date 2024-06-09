@@ -5,7 +5,7 @@ using tesinormed.FAndCDaveCo.Extensions;
 
 namespace tesinormed.FAndCDaveCo.Insurance.UI;
 
-public class PolicyInformationTerminal : TerminalApplicationExtension
+public class PolicyInformationTerminal : TerminalApplication
 {
 	public override void Initialization()
 	{

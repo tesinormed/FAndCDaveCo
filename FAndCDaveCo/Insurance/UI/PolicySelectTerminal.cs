@@ -6,7 +6,7 @@ using tesinormed.FAndCDaveCo.Network;
 
 namespace tesinormed.FAndCDaveCo.Insurance.UI;
 
-public class PolicySelectTerminal : InteractiveTerminalApplicationExtension
+public class PolicySelectTerminal : InteractiveTerminalApplication
 {
 	protected override string Title => $"{PolicyTerminal.Title}: Selection";
 
@@ -36,6 +36,13 @@ public class PolicySelectTerminal : InteractiveTerminalApplicationExtension
 
 	public override void Initialization()
 	{
+		if (StartOfRound.Instance.isChallengeFile)
+		{
+			LockedNotification(TextElement.Create("You cannot get an insurance policy while doing the challenge moon."));
+			Plugin.Logger.LogDebug("local player tried to get an insurance policy while doing a challenge moon");
+			return;
+		}
+
 		// create cursor element for each tier
 		(MainScreen, MainCursorMenu) = Selection(
 			prompt: "Select a policy tier.",

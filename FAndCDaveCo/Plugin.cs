@@ -20,7 +20,7 @@ namespace tesinormed.FAndCDaveCo;
 [BepInDependency("WhiteSpike.InteractiveTerminalAPI")]
 [BepInDependency("MaxWasUnavailable.LethalModDataLib")]
 [BepInDependency("LethalNetworkAPI")]
-[BepInDependency("com.sigurd.csync", "5.0.0")]
+[BepInDependency("com.sigurd.csync", MinimumDependencyVersion: "5.0.0")]
 [LobbyCompatibility(CompatibilityLevel.Everyone, VersionStrictness.Minor)]
 public class Plugin : BaseUnityPlugin
 {
@@ -95,11 +95,13 @@ public class Plugin : BaseUnityPlugin
 		{
 			PolicyState = new();
 			BankState = new();
+			HUDManagerEvents.QueuedHudTips.RemoveAll(_ => true);
 		};
 		SaveLoadEvents.PostResetSavedGameValuesEvent += () =>
 		{
 			PolicyState = new();
 			BankState = new();
+			HUDManagerEvents.QueuedHudTips.RemoveAll(_ => true);
 
 			PolicyState.Save();
 			BankState.Save();
@@ -108,13 +110,13 @@ public class Plugin : BaseUnityPlugin
 
 	private void RegisterTerminal()
 	{
-		InteractiveTerminalManagerExtensions.RegisterApplication<PolicyInformationTerminal>("insurance info", "insurance information", "insurance policy");
-		InteractiveTerminalManagerExtensions.RegisterApplication<PolicySelectTerminal>("insurance select", "insurance get");
-		InteractiveTerminalManagerExtensions.RegisterApplication<PolicyClaimTerminal>("insurance claim", "insurance claims", "insurance make claim");
+		InteractiveTerminalManager.RegisterApplication<PolicyInformationTerminal>("insurance info", "insurance information", "insurance policy");
+		InteractiveTerminalManager.RegisterApplication<PolicySelectTerminal>("insurance select", "insurance get");
+		InteractiveTerminalManager.RegisterApplication<PolicyClaimTerminal>("insurance claim", "insurance claims", "insurance make claim");
 
-		InteractiveTerminalManagerExtensions.RegisterApplication<BankLoanInformationTerminal>("bank loan info", "bank loan information");
-		InteractiveTerminalManagerExtensions.RegisterApplication<BankLoanGetTerminal>("bank loan get", "bank loan");
-		InteractiveTerminalManagerExtensions.RegisterApplication<BankLoanPaymentTerminal>("bank loan pay", "bank loan payment");
+		InteractiveTerminalManager.RegisterApplication<BankLoanInformationTerminal>("bank loan info", "bank loan information");
+		InteractiveTerminalManager.RegisterApplication<BankLoanGetTerminal>("bank loan get", "bank loan");
+		InteractiveTerminalManager.RegisterApplication<BankLoanPaymentTerminal>("bank loan pay", "bank loan payment");
 	}
 
 	internal static void Patch()

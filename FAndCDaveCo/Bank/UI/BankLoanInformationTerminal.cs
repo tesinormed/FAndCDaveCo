@@ -5,7 +5,7 @@ using tesinormed.FAndCDaveCo.Extensions;
 
 namespace tesinormed.FAndCDaveCo.Bank.UI;
 
-public class BankLoanInformationTerminal : TerminalApplicationExtension
+public class BankLoanInformationTerminal : TerminalApplication
 {
 	public override void Initialization()
 	{
@@ -21,7 +21,9 @@ public class BankLoanInformationTerminal : TerminalApplicationExtension
 			textElements.Add(TextElement.Create($"Amount paid: ${Plugin.BankState.Loan.AmountPaid}, amount left: ${Plugin.BankState.Loan.AmountUnpaid}, total: ${Plugin.BankState.Loan.Total}."));
 
 			if (Plugin.BankState.Loan.DaysSinceIssuance >= Plugin.Config.PenaltyStartDaysFromIssuance)
+			{
 				textElements.Add(TextElement.Create($"{(int) (Plugin.Config.PenaltyAmount * 100)}% of your credits are currently being garnished each day."));
+			}
 		}
 
 		var screen = BoxedScreen.Create($"{BankTerminal.Title}: Loan information", textElements.ToArray());

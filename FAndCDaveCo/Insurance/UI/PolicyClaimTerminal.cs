@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
@@ -9,7 +8,7 @@ using tesinormed.FAndCDaveCo.Network;
 
 namespace tesinormed.FAndCDaveCo.Insurance.UI;
 
-public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
+public class PolicyClaimTerminal : InteractiveTerminalApplication
 {
 	protected override string Title => $"{PolicyTerminal.Title}: Make a claim";
 
@@ -17,8 +16,8 @@ public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
 	(
 		name: $"Day {day + 1}: ${claim.Value}",
 		action: () => ConfirmClaim(day, claim),
-		active: _ => true,
-		selectInactive: false
+		active: _ => Plugin.PolicyState.UnclaimedClaims.ContainsKey(day),
+		selectInactive: true
 	);
 
 	public override void Initialization()
@@ -45,6 +44,12 @@ public class PolicyClaimTerminal : InteractiveTerminalApplicationExtension
 
 	private void ConfirmClaim(int day, PolicyClaim claim)
 	{
+		if (!Plugin.PolicyState.UnclaimedClaims.ContainsKey(day))
+		{
+			Notification(backAction: PreviousMainScreenAction, TextElement.Create("This claim no longer exists."));
+			return;
+		}
+
 		var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
 		var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
 

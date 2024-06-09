@@ -6,7 +6,6 @@ using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Bank;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Network;
-using UnityEngine;
 
 namespace tesinormed.FAndCDaveCo.Patches;
 
@@ -14,17 +13,11 @@ namespace tesinormed.FAndCDaveCo.Patches;
 public static class StartOfRoundPatch
 {
 	[HarmonyPatch("EndOfGame")]
-	[HarmonyPostfix]
-	public static IEnumerator EndOfGame(IEnumerator values, StartOfRound __instance)
+	[HarmonyPrefix]
+	public static void EndOfGamePrefix(ref StartOfRound __instance)
 	{
-		// return all of the previous values
-		do
-		{
-			yield return values.Current;
-		} while (values.MoveNext());
-
-		// make sure we're the server
-		if (__instance.IsServer)
+		// make sure we're the server and it's not a challenge moon
+		if (__instance.IsServer && !StartOfRound.Instance.isChallengeFile)
 		{
 			// garbage collect old claims
 			foreach (var keyValuePair in Plugin.PolicyState.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Config.ClaimRetentionDays))
@@ -51,14 +44,6 @@ public static class StartOfRoundPatch
 					insuranceRenewalSuccess.SendAllClients(Plugin.PolicyState.TotalPremium);
 
 					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.PolicyState.TotalPremium}");
-
-					if (Plugin.PolicyState.Claims.ContainsKey(StartOfRound.Instance.gameStats.daysSpent - 1))
-					{
-						yield return new WaitForSeconds(3);
-						// notify crew of pending insurance claim
-						LethalServerEvent insuranceClaimAvailable = new(HUDManagerEvents.InsuranceClaimAvailableIdentifier);
-						insuranceClaimAvailable.InvokeAllClients();
-					}
 				}
 				else
 				{
@@ -102,10 +87,40 @@ public static class StartOfRoundPatch
 				LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
 				updateLoan.SendServer(Plugin.BankState.Loan);
 
-				yield return new WaitForSeconds(3);
 				// notify all of the credits garnishing
 				LethalServerMessage<int> bankLoanCreditsGarnished = new(HUDManagerEvents.BankLoanCreditsGarnishedIdentifier);
 				bankLoanCreditsGarnished.SendAllClients(amountGarnished);
+			}
+		}
+	}
+
+	[HarmonyPatch("EndOfGame")]
+	[HarmonyPostfix]
+	public static IEnumerator EndOfGamePostfix(IEnumerator values, StartOfRound __instance)
+	{
+		// return all of the previous values
+		do
+		{
+			yield return values.Current;
+		} while (values.MoveNext());
+
+		// make sure we're the server and it's not a challenge moon
+		if (__instance.IsServer && !StartOfRound.Instance.isChallengeFile)
+		{
+			// check if there's a new claim available
+			if (Plugin.PolicyState.Policy != Policy.None && Plugin.PolicyState.Claims.ContainsKey(StartOfRound.Instance.gameStats.daysSpent - 1))
+			{
+				// notify crew of pending insurance claim
+				LethalServerEvent insuranceClaimAvailable = new(HUDManagerEvents.InsuranceClaimAvailableIdentifier);
+				insuranceClaimAvailable.InvokeAllClients();
+			}
+
+			// make sure we aren't getting fired
+			if (!(TimeOfDay.Instance.timeUntilDeadline <= 0.0))
+			{
+				// run all of the queued HUD tips
+				LethalServerEvent runQueuedHudTips = new(HUDManagerEvents.RunQueuedHudTipsIdentifier);
+				runQueuedHudTips.InvokeAllClients();
 			}
 		}
 	}

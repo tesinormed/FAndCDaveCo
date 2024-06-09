@@ -1,12 +1,11 @@
 ﻿using System;
 using InteractiveTerminalAPI.UI;
-using InteractiveTerminalAPI.UI.Application;
 using InteractiveTerminalAPI.UI.Cursor;
 using InteractiveTerminalAPI.UI.Screen;
 
 namespace tesinormed.FAndCDaveCo.Extensions;
 
-public abstract class InteractiveTerminalApplicationExtension : InteractiveTerminalApplication
+public abstract class InteractiveTerminalApplication : InteractiveTerminalAPI.UI.Application.InteractiveTerminalApplication
 {
 	protected abstract string Title { get; }
 

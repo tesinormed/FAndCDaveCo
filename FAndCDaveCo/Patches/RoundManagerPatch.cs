@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using HarmonyLib;
-using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Insurance;
-using tesinormed.FAndCDaveCo.Network;
 using UnityEngine;
 
 namespace tesinormed.FAndCDaveCo.Patches;

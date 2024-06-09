@@ -6,7 +6,7 @@ using tesinormed.FAndCDaveCo.Network;
 
 namespace tesinormed.FAndCDaveCo.Bank.UI;
 
-public class BankLoanPaymentTerminal : InteractiveTerminalApplicationExtension
+public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 {
 	protected override string Title => $"{BankTerminal.Title}: Submit loan payment";
 
@@ -14,7 +14,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplicationExtension
 	(
 		name: $"{(int) (amount * 100)}%",
 		action: () => ConfirmPayLoan((int) (Plugin.BankState.Loan.Total * amount)),
-		active: _ => Plugin.Terminal.groupCredits >= (int) (Plugin.BankState.Loan.Total * amount),
+		active: _ => terminal.groupCredits >= (int) (Plugin.BankState.Loan.Total * amount),
 		selectInactive: true
 	);
 
@@ -39,7 +39,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplicationExtension
 
 	private void ConfirmPayLoan(int amount)
 	{
-		if (Plugin.Terminal.groupCredits < amount)
+		if (terminal.groupCredits < amount)
 		{
 			Notification(backAction: PreviousScreenAction, TextElement.Create($"You do not have enough credits to submit a payment of ${amount} for the loan."));
 			return;

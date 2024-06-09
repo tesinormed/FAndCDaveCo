@@ -1,9 +1,8 @@
 ﻿using System;
-using InteractiveTerminalAPI.UI.Application;
 
 namespace tesinormed.FAndCDaveCo.Extensions;
 
-public abstract class TerminalApplicationExtension : TerminalApplication
+public abstract class TerminalApplication : InteractiveTerminalAPI.UI.Application.TerminalApplication
 {
 	protected override string GetApplicationText() => currentScreen.GetText(availableLength: 51);
 
