@@ -35,6 +35,14 @@
         </ItemGroup>
     </Target>
 
+    <Target Name="BuildThunderstore" Condition="'$(Configuration)' == 'Debug'" AfterTargets="PostBuildEvent">
+        <Exec WorkingDirectory="$(SolutionDir)" Command="tcli build"/>
+    </Target>
+
+    <Target Name="PublishThunderstore" Condition="'$(Configuration)' == 'Release'" AfterTargets="PostBuildEvent">
+        <Exec WorkingDirectory="$(SolutionDir)" Command="tcli publish --token $(TCLI_TOKEN)"/>
+    </Target>
+
     <ItemGroup>
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
         <PackageReference Include="BepInEx.Core" Version="5.*" PrivateAssets="all"/>
