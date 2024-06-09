@@ -16,6 +16,7 @@ Thank you to the following people / groups for inspiration, documentation, libra
 - [MaxWasUnavailable](https://github.com/MaxWasUnavailable): [LobbyCompatibility](https://github.com/MaxWasUnavailable/LobbyCompatibility), [LethalModDataLib](https://github.com/MaxWasUnavailable/LethalModDataLib)
 - [WhiteSpike](https://github.com/WhiteSpike): [InteractiveTerminalAPI](https://github.com/WhiteSpike/InteractiveTerminalAPI)
 - [Xilophor](https://github.com/Xilophor): [LethalNetworkAPI](https://github.com/Xilophor/LethalNetworkAPI)
+- [Sigurd](https://github.com/lc-sigurd): [CSync](https://github.com/lc-sigurd/CSync)
 - [tinyhoot](https://github.com/tinyhoot): [ShipLoot](https://github.com/tinyhoot/ShipLoot)
 - akechii: [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
 - [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
