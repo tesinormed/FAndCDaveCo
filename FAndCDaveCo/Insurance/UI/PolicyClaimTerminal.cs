@@ -16,8 +16,8 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 	(
 		name: $"Day {day + 1}: ${claim.Value}",
 		action: () => ConfirmClaim(day, claim),
-		active: _ => Plugin.PolicyState.UnclaimedClaims.ContainsKey(day),
-		selectInactive: true
+		active: _ => true,
+		selectInactive: false
 	);
 
 	public override void Initialization()
@@ -44,12 +44,6 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 
 	private void ConfirmClaim(int day, PolicyClaim claim)
 	{
-		if (!Plugin.PolicyState.UnclaimedClaims.ContainsKey(day))
-		{
-			Notification(backAction: PreviousMainScreenAction, TextElement.Create("This claim no longer exists."));
-			return;
-		}
-
 		var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
 		var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
 
@@ -78,7 +72,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 		LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(NetworkVariableEvents.UpdateClaimsIdentifier);
 		updateClaims.SendServer(Plugin.PolicyState.Claims);
 
-		Notification(backAction: PreviousMainScreenAction, TextElement.Create($"The claim for day {day} has been deleted."));
+		LockedNotification(TextElement.Create($"The claim for day {day} has been deleted."));
 	}
 
 	private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim)
