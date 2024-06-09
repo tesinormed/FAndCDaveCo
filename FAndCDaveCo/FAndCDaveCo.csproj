@@ -29,6 +29,12 @@
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <OutputPath>bin\</OutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
     <Target Name="ClearReferenceCopyLocalPaths" AfterTargets="ResolveAssemblyReferences">
         <ItemGroup>
             <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"/>

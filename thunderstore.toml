@@ -23,7 +23,7 @@ readme = "./README.markdown"
 outdir = "./build"
 
 [[build.copy]]
-source = "./FAndCDaveCo/bin/Debug/netstandard2.1/tesinormed.FAndCDaveCo.dll"
+source = "./FAndCDaveCo/bin/tesinormed.FAndCDaveCo.dll"
 target = "./tesinormed.FAndCDaveCo.dll"
 
 [[build.copy]]
