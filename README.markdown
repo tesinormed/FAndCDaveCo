@@ -21,7 +21,7 @@ Thank you to the following people / groups for inspiration, documentation, libra
 - [akechii](https://thunderstore.io/c/lethal-company/p/akechii/): [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
 - [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
 - [dancemoon](https://github.com/quackest): [DanceTools](https://github.com/quackest/dancetools)
-- [bizzlemip](https://thunderstore.io/c/lethal-company/p/bizzlemip/): [NoPenalty](https://thunderstore.io/c/lethal-company/p/bizzlemip/NoPenalty/)
+- [DaXcess](https://thunderstore.io/c/lethal-company/p/DaXcess/): [NoPenaltyReimagined](https://thunderstore.io/c/lethal-company/p/DaXcess/NoPenaltyReimagined/)
 
 ## Features
 
@@ -59,7 +59,7 @@ Thank you to the following people / groups for inspiration, documentation, libra
 - `insurance info`, `insurance information`, `insurance policy`
 	- Get information on the current insurance policy
 - `insurance select`, `insurance get`
-	- Select a new insurance policy
+	- Select a new insurance policy (or cancel your current insurance policy)
 - `insurance claim`, `insurance claims`, `insurance make claim`
 	- Confirm an insurance claim
 	- You must have a insurance policy
