@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
 using LethalNetworkAPI;
@@ -14,7 +13,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 
 	private CursorElement CreateCursorElement(int day, PolicyClaim claim) => CursorElement.Create
 	(
-		name: $"Day {day + 1}: ${claim.Value}",
+		name: $"Day {day}: ${claim.Value}",
 		action: () => ConfirmClaim(day, claim),
 		active: _ => true,
 		selectInactive: false
@@ -66,11 +65,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 
 	private void DeleteClaim(int day)
 	{
-		// delete claim
-		Plugin.PolicyState.Claims.Remove(day);
-		// sync over network
-		LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(NetworkVariableEvents.UpdateClaimsIdentifier);
-		updateClaims.SendServer(Plugin.PolicyState.Claims);
+		Plugin.PolicyState.UpdateAndSyncClaims(claims => claims.Remove(day));
 
 		LockedNotification(TextElement.Create($"The claim for day {day} has been deleted."));
 	}
@@ -84,11 +79,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 			return;
 		}
 
-		// set claims
-		Plugin.PolicyState.Claims[day] = new(claim.Value, claimed: true);
-		// sync over network
-		LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(NetworkVariableEvents.UpdateClaimsIdentifier);
-		updateClaims.SendServer(Plugin.PolicyState.Claims);
+		Plugin.PolicyState.UpdateAndSyncClaims(claims => claims[day] = new(claim.Value, claimed: true));
 
 		// deduct credits
 		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);

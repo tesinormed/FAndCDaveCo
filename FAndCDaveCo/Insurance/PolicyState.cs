@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LethalModDataLib.Attributes;
 using LethalModDataLib.Base;
+using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Extensions;
+using tesinormed.FAndCDaveCo.Network;
 
 namespace tesinormed.FAndCDaveCo.Insurance;
 
@@ -29,4 +32,24 @@ public class PolicyState : ModDataContainer
 		Plugin.SyncedPolicy.Value = Policy;
 		Plugin.SyncedClaims.Value = Claims;
 	}
+
+	public void SetAndSyncPolicy(Policy policy)
+	{
+		Policy = policy;
+
+		// sync over network
+		LethalClientMessage<Policy> updatePolicy = new(NetworkVariableEvents.UpdatePolicyIdentifier);
+		updatePolicy.SendServer(policy);
+	}
+
+	public void UpdateAndSyncClaims(Action<Dictionary<int, PolicyClaim>> action)
+	{
+		action.Invoke(Claims);
+
+		// sync over network
+		LethalClientMessage<Dictionary<int, PolicyClaim>> updateClaims = new(NetworkVariableEvents.UpdateClaimsIdentifier);
+		updateClaims.SendServer(Claims);
+	}
+
+	public static bool DisableDeathCreditPenalty => Plugin.PolicyState.Policy.Tier != PolicyTier.None ? Plugin.Config.GameDisableDeathCreditPenalty : false;
 }

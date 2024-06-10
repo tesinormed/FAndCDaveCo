@@ -1,4 +1,7 @@
-﻿using LethalModDataLib.Base;
+﻿using System;
+using LethalModDataLib.Base;
+using LethalNetworkAPI;
+using tesinormed.FAndCDaveCo.Network;
 
 namespace tesinormed.FAndCDaveCo.Bank;
 
@@ -16,5 +19,23 @@ public class BankState : ModDataContainer
 
 		// sync to network
 		Plugin.SyncedLoan.Value = Loan;
+	}
+
+	public void SetAndSyncLoan(Loan loan)
+	{
+		Loan = loan;
+
+		// sync over network
+		LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
+		updateLoan.SendServer(loan);
+	}
+
+	public void UpdateAndSyncLoan(Action<Loan> action)
+	{
+		action.Invoke(Loan);
+
+		// sync over network
+		LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
+		updateLoan.SendServer(Loan);
 	}
 }

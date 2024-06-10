@@ -68,7 +68,7 @@ public class Config : SyncedConfig2<Config>
 		GameDisableDeathCreditPenalty = configFile.BindSyncedEntry(
 			new ConfigDefinition("Game", "DisableDeathCreditPenalty"),
 			defaultValue: true,
-			new ConfigDescription("Whether to disable the death credit penalty (deduction of credits on death)")
+			new ConfigDescription("Whether to disable the death credit penalty (only if there is a current insurance policy)")
 		);
 		#endregion
 

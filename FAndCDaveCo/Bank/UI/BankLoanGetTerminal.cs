@@ -38,12 +38,9 @@ public class BankLoanGetTerminal : InteractiveTerminalApplication
 
 	private void GetLoan(Loan loan)
 	{
-		// update current loan
-		Plugin.BankState.Loan = loan;
-		// sync over network
-		LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
-		updateLoan.SendServer(loan);
+		Plugin.BankState.SetAndSyncLoan(loan);
 		Plugin.Logger.LogDebug($"took out a loan for {loan.Principal}");
+
 		// update quota fulfillment
 		LethalClientEvent syncQuotaFulfilled = new(CreditEvents.SyncQuotaFulfilled);
 		syncQuotaFulfilled.InvokeServer();

@@ -26,7 +26,7 @@ Thank you to the following people / groups for inspiration, documentation, libra
 ## Features
 
 - Configurable values: if you don't like these numbers / options, you can change them
-- Disables the death credit penalty
+- Disables the death credit penalty only if there is a current insurance policy
 - Insurance for when everyone dies and you lose your loot
 	- Get an insurance policy using the terminal
 		- You will be charged for the initial payment

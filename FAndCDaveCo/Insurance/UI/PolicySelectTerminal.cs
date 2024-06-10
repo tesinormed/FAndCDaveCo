@@ -48,8 +48,33 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 			prompt: "Select a policy tier.",
 			CreatePolicyTierCursorElement(PolicyTier.HighDeductible, "High deductible, low premium"),
 			CreatePolicyTierCursorElement(PolicyTier.LowDeductible, "Low deductible, medium premium"),
-			CreatePolicyTierCursorElement(PolicyTier.NoDeductible, "No deductible, high premium")
+			CreatePolicyTierCursorElement(PolicyTier.NoDeductible, "No deductible, high premium"),
+			CursorElement.Create(name: "Cancel policy", action: ConfirmCancelPolicy, active: _ => Plugin.PolicyState.Policy.Tier != PolicyTier.None, selectInactive: true)
 		);
+	}
+
+	private void ConfirmCancelPolicy()
+	{
+		// make sure enough credits for initial premium payment
+		if (Plugin.PolicyState.Policy.Tier == PolicyTier.None)
+		{
+			Notification(backAction: PreviousScreenAction, TextElement.Create("You do not currently have a policy."));
+			return;
+		}
+
+		Confirm(
+			confirmAction: CancelPolicy,
+			declineAction: PreviousScreenAction,
+			TextElement.Create("Are you sure you want to cancel your current policy?"),
+			TextElement.Create($"Your current policy is {Plugin.PolicyState.Policy.Tier.ToFriendlyString()} (${Plugin.PolicyState.Policy.Coverage}).")
+		);
+	}
+
+	private void CancelPolicy()
+	{
+		Plugin.PolicyState.SetAndSyncPolicy(Policy.None);
+
+		LockedNotification(TextElement.Create("Your policy has been canceled."));
 	}
 
 	private void SelectCoverage(PolicyTier policyTier)
@@ -100,11 +125,7 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 
 	private void SetEverything(Policy policy, int cost)
 	{
-		// update policy
-		Plugin.PolicyState.Policy = policy;
-		// sync over network
-		LethalClientMessage<Policy> updatePolicy = new(NetworkVariableEvents.UpdatePolicyIdentifier);
-		updatePolicy.SendServer(policy);
+		Plugin.PolicyState.SetAndSyncPolicy(policy);
 
 		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
 		deductGroupCredits.SendServer(cost);

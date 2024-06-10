@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -125,7 +126,7 @@ public class Plugin : BaseUnityPlugin
 
 		Logger.LogDebug("patching in progress");
 
-		Harmony.PatchAll();
+		Harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 		Logger.LogDebug("finished patching");
 	}

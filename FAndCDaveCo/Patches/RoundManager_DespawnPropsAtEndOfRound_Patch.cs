@@ -1,16 +1,16 @@
 ﻿using System.Linq;
 using HarmonyLib;
+using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Insurance;
+using tesinormed.FAndCDaveCo.Network;
 using UnityEngine;
 
 namespace tesinormed.FAndCDaveCo.Patches;
 
-[HarmonyPatch(typeof(RoundManager))]
-public static class RoundManagerPatch
+[HarmonyPatch(typeof(RoundManager), nameof(RoundManager.DespawnPropsAtEndOfRound))]
+public static class RoundManager_DespawnPropsAtEndOfRound_Patch
 {
-	[HarmonyPatch("DespawnPropsAtEndOfRound")]
-	[HarmonyPrefix]
-	public static void DespawnPropsAtEndOfRound(ref RoundManager __instance)
+	public static void Prefix(ref RoundManager __instance)
 	{
 		// make sure we're on the server
 		// check if it's the failure state (all players died)
@@ -30,6 +30,10 @@ public static class RoundManagerPatch
 				Plugin.SyncedClaims.Value = Plugin.PolicyState.Claims;
 
 				Plugin.Logger.LogInfo($"crew all dead, recording pending claim with value of {lootValue} for day {StartOfRound.Instance.gameStats.daysSpent - 1}");
+
+				// notify crew of pending insurance claim
+				LethalServerEvent insuranceClaimAvailable = new(HUDManagerEvents.InsuranceClaimAvailableIdentifier);
+				insuranceClaimAvailable.InvokeAllClients();
 			}
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using InteractiveTerminalAPI.UI;
+﻿using System;
+using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
 using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Extensions;
@@ -10,13 +11,21 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 {
 	protected override string Title => $"{BankTerminal.Title}: Submit loan payment";
 
-	private CursorElement CreateCursorElement(double amount) => CursorElement.Create
-	(
-		name: $"{(int) (amount * 100)}%",
-		action: () => ConfirmPayLoan((int) (Plugin.BankState.Loan.Total * amount)),
-		active: _ => terminal.groupCredits >= (int) (Plugin.BankState.Loan.Total * amount),
-		selectInactive: true
-	);
+	private CursorElement CreateCursorElement(double amount)
+	{
+		var cost = Math.Min(
+			(int) (Plugin.BankState.Loan.Total * amount),
+			Plugin.BankState.Loan.AmountUnpaid
+		);
+
+		return CursorElement.Create
+		(
+			name: $"{(int) (amount * 100)}%",
+			action: () => ConfirmPayLoan(cost),
+			active: _ => terminal.groupCredits >= cost,
+			selectInactive: true
+		);
+	}
 
 	public override void Initialization()
 	{
@@ -57,23 +66,19 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 		// deduct credits
 		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
 		deductGroupCredits.SendServer(amount);
-		// add to paid amount of loan
-		Plugin.BankState.Loan.AmountPaid += amount;
-		Plugin.Logger.LogDebug($"paid {amount} towards the current loan");
-		// check if loan has been fully paid
-		if (Plugin.BankState.Loan.AmountUnpaid == 0)
+
+		if (Plugin.BankState.Loan.AmountUnpaid - amount == 0)
 		{
-			Plugin.BankState.Loan = Loan.None;
+			Plugin.BankState.SetAndSyncLoan(Loan.None);
+			Plugin.Logger.LogDebug("loan paid off fully; removed");
 			LockedNotification(TextElement.Create("You have paid off your loan fully."));
-			Plugin.Logger.LogDebug("loan paid off fully; removing");
 		}
 		else
 		{
+			// add to paid amount of loan
+			Plugin.BankState.UpdateAndSyncLoan(loan => loan.AmountPaid += amount);
+			Plugin.Logger.LogDebug($"paid {amount} towards the current loan");
 			LockedNotification(TextElement.Create($"You have paid ${amount}; ${Plugin.BankState.Loan.AmountUnpaid} must still be paid."));
 		}
-
-		// sync over network
-		LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
-		updateLoan.SendServer(Plugin.BankState.Loan);
 	}
 }

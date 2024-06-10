@@ -1,23 +1,25 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using HarmonyLib;
 using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Bank;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Network;
+using static HarmonyLib.AccessTools;
+using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace tesinormed.FAndCDaveCo.Patches;
 
-[HarmonyPatch(typeof(StartOfRound))]
-public static class StartOfRoundPatch
+[HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.EndOfGame))]
+public static class StartOfRound_EndOfGame_Patch
 {
-	[HarmonyPatch("EndOfGame")]
-	[HarmonyPrefix]
-	public static void EndOfGamePrefix(ref StartOfRound __instance)
+	public static void Prefix(ref StartOfRound __instance)
 	{
 		// make sure we're the server and it's not a challenge moon
-		if (__instance.IsServer && !StartOfRound.Instance.isChallengeFile)
+		if (__instance is { IsServer: true, isChallengeFile: false })
 		{
 			// garbage collect old claims
 			foreach (var keyValuePair in Plugin.PolicyState.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Config.ClaimRetentionDays))
@@ -94,9 +96,25 @@ public static class StartOfRoundPatch
 		}
 	}
 
-	[HarmonyPatch("EndOfGame")]
-	[HarmonyPostfix]
-	public static IEnumerator EndOfGamePostfix(IEnumerator values, StartOfRound __instance)
+	[HarmonyPatch(MethodType.Enumerator)]
+	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+	{
+		var codeMatcher = new CodeMatcher(instructions, generator)
+			.SearchForward(instruction => instruction.Calls(Method(typeof(HUDManager), nameof(HUDManager.ApplyPenalty))))
+			.SearchBack(instruction => instruction.LoadsField(Field(typeof(StartOfRound), nameof(StartOfRound.isChallengeFile))))
+			.SearchForward(instruction => instruction.opcode == OpCodes.Brtrue);
+		var label = codeMatcher.Operand;
+
+		return codeMatcher
+			.Advance(1)
+			.InsertAndAdvance(
+				new(OpCodes.Call, PropertyGetter(typeof(PolicyState), nameof(PolicyState.DisableDeathCreditPenalty))),
+				new(OpCodes.Brtrue, label)
+			)
+			.InstructionEnumeration();
+	}
+
+	public static IEnumerator Postfix(IEnumerator values, StartOfRound __instance)
 	{
 		// return all of the previous values
 		do
@@ -105,16 +123,8 @@ public static class StartOfRoundPatch
 		} while (values.MoveNext());
 
 		// make sure we're the server and it's not a challenge moon
-		if (__instance.IsServer && !StartOfRound.Instance.isChallengeFile)
+		if (__instance is { IsServer: true, isChallengeFile: false })
 		{
-			// check if there's a new claim available
-			if (Plugin.PolicyState.Policy != Policy.None && Plugin.PolicyState.Claims.ContainsKey(StartOfRound.Instance.gameStats.daysSpent - 1))
-			{
-				// notify crew of pending insurance claim
-				LethalServerEvent insuranceClaimAvailable = new(HUDManagerEvents.InsuranceClaimAvailableIdentifier);
-				insuranceClaimAvailable.InvokeAllClients();
-			}
-
 			// make sure we aren't getting fired
 			if (!(TimeOfDay.Instance.timeUntilDeadline <= 0.0))
 			{
