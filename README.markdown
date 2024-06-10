@@ -21,7 +21,7 @@ Thank you to the following people / groups for inspiration, documentation, libra
 - [akechii](https://thunderstore.io/c/lethal-company/p/akechii/): [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
 - [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
 - [dancemoon](https://github.com/quackest): [DanceTools](https://github.com/quackest/dancetools)
-- [DaXcess](https://thunderstore.io/c/lethal-company/p/DaXcess/): [NoPenaltyReimagined](https://thunderstore.io/c/lethal-company/p/DaXcess/NoPenaltyReimagined/)
+- [DaXcess](https://github.com/DaXcess): [NoPenaltyReimagined](https://github.com/DaXcess/NoPenaltyReimagined)
 
 ## Features
 
