@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "tesinormed"
 name = "FAndCDaveCo"
-versionNumber = "1.1.2"
+versionNumber = "1.2.0"
 description = "Adds an insurance system and a loan system."
 websiteUrl = "https://github.com/tesinormed/FAndCDaveCo"
 containsNsfwContent = false

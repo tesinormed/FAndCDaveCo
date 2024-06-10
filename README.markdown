@@ -18,13 +18,15 @@ Thank you to the following people / groups for inspiration, documentation, libra
 - [Xilophor](https://github.com/Xilophor): [LethalNetworkAPI](https://github.com/Xilophor/LethalNetworkAPI)
 - [Sigurd](https://github.com/lc-sigurd): [CSync](https://github.com/lc-sigurd/CSync)
 - [tinyhoot](https://github.com/tinyhoot): [ShipLoot](https://github.com/tinyhoot/ShipLoot)
-- akechii: [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
+- [akechii](https://thunderstore.io/c/lethal-company/p/akechii/): [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
 - [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
 - [dancemoon](https://github.com/quackest): [DanceTools](https://github.com/quackest/dancetools)
+- [bizzlemip](https://thunderstore.io/c/lethal-company/p/bizzlemip/): [NoPenalty](https://thunderstore.io/c/lethal-company/p/bizzlemip/NoPenalty/)
 
 ## Features
 
-- Configurable values: if you don't like these numbers, you can change them
+- Configurable values: if you don't like these numbers / options, you can change them
+- Disables the death credit penalty
 - Insurance for when everyone dies and you lose your loot
 	- Get an insurance policy using the terminal
 		- You will be charged for the initial payment

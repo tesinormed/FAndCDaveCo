@@ -6,6 +6,10 @@ namespace tesinormed.FAndCDaveCo;
 
 public class Config : SyncedConfig2<Config>
 {
+	#region Game
+	[SyncedEntryField] public readonly SyncedEntry<bool> GameDisableDeathCreditPenalty;
+	#endregion
+
 	#region Insurance
 	#region Policies
 	#region Economic
@@ -60,6 +64,14 @@ public class Config : SyncedConfig2<Config>
 
 	public Config(ConfigFile configFile) : base(MyPluginInfo.PLUGIN_GUID)
 	{
+		#region Game
+		GameDisableDeathCreditPenalty = configFile.BindSyncedEntry(
+			new ConfigDefinition("Game", "DisableDeathCreditPenalty"),
+			defaultValue: true,
+			new ConfigDescription("Whether to disable the death credit penalty (deduction of credits on death)")
+		);
+		#endregion
+
 		#region Insurance
 		#region Policies
 		#region Economic
