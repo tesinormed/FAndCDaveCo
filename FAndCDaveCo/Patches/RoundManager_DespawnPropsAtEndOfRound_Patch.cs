@@ -24,11 +24,7 @@ public static class RoundManager_DespawnPropsAtEndOfRound_Patch
 			// make sure there was at least some loot
 			if (lootValue > 0)
 			{
-				// update claims
-				Plugin.PolicyState.Claims[StartOfRound.Instance.gameStats.daysSpent - 1] = new(lootValue);
-				// sync over network
-				Plugin.SyncedClaims.Value = Plugin.PolicyState.Claims;
-
+				Plugin.PolicyState.UpdateAndSyncClaims(claims => claims[StartOfRound.Instance.gameStats.daysSpent - 1] = new(lootValue));
 				Plugin.Logger.LogInfo($"crew all dead, recording pending claim with value of {lootValue} for day {StartOfRound.Instance.gameStats.daysSpent - 1}");
 
 				// notify crew of pending insurance claim
