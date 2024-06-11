@@ -38,4 +38,6 @@ public class BankState : ModDataContainer
 		LethalClientMessage<Loan> updateLoan = new(NetworkVariableEvents.UpdateLoanIdentifier);
 		updateLoan.SendServer(Loan);
 	}
+
+	public override string ToString() => $"BankState(loan: {Loan})";
 }

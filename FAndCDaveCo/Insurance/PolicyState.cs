@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using LethalModDataLib.Attributes;
 using LethalModDataLib.Base;
 using LethalNetworkAPI;
@@ -52,4 +54,16 @@ public class PolicyState : ModDataContainer
 	}
 
 	public static bool DisableDeathCreditPenalty => Plugin.PolicyState.Policy.Tier != PolicyTier.None ? Plugin.Config.GameDisableDeathCreditPenalty : false;
+
+	public override string ToString()
+	{
+		var stringBuilder = new StringBuilder();
+
+		stringBuilder.Append("PolicyState(");
+		stringBuilder.Append($"policy: {Policy}");
+		if (Claims.Count > 0) stringBuilder.Append($", claims: [{string.Join(", ", Claims)}]");
+		stringBuilder.Append(")");
+
+		return stringBuilder.ToString();
+	}
 }

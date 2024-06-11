@@ -68,7 +68,7 @@ public class Plugin : BaseUnityPlugin
 		SyncedClaims.OnValueChanged += data =>
 		{
 			PolicyState.Claims = data;
-			Logger.LogDebug($"synced policy state claims {data}");
+			Logger.LogDebug($"synced policy state claims [{string.Join(", ", data)}]");
 		};
 		SyncedLoan.OnValueChanged += data =>
 		{
