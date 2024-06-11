@@ -9,19 +9,20 @@ It has an agreement with the Company to offer its services to Company employees.
 
 Thank you to the following people / groups for inspiration, documentation, libraries, and references.
 
-- [domkalan](https://github.com/domkalan): [LethalInsurance](https://github.com/domkalan/LethalInsurance)
-- [remiX-](https://github.com/remiX-): [LethalCredit](https://github.com/remiX-/LethalCredit)
+- [domkalanus](https://thunderstore.io/c/lethal-company/p/domkalanus/): [lethalinsurance](https://thunderstore.io/c/lethal-company/p/domkalanus/lethalinsurance/)
+- [Um_no](https://thunderstore.io/c/lethal-company/p/Um_no/): [LethalCredit](https://thunderstore.io/c/lethal-company/p/Um_no/LethalCredit/)
 - [Unofficial Lethal Company Community](https://github.com/LethalCompanyCommunity): [Lethal Company Modding Wiki](https://lethal.wiki/)
 - [Distractic](https://github.com/Distractic): [LethalCompanyTemplate](https://github.com/Distractic/LethalCompanyTemplate)
-- [MaxWasUnavailable](https://github.com/MaxWasUnavailable): [LobbyCompatibility](https://github.com/MaxWasUnavailable/LobbyCompatibility), [LethalModDataLib](https://github.com/MaxWasUnavailable/LethalModDataLib)
-- [WhiteSpike](https://github.com/WhiteSpike): [InteractiveTerminalAPI](https://github.com/WhiteSpike/InteractiveTerminalAPI)
-- [Xilophor](https://github.com/Xilophor): [LethalNetworkAPI](https://github.com/Xilophor/LethalNetworkAPI)
-- [Sigurd](https://github.com/lc-sigurd): [CSync](https://github.com/lc-sigurd/CSync)
-- [tinyhoot](https://github.com/tinyhoot): [ShipLoot](https://github.com/tinyhoot/ShipLoot)
+- [BMX](https://thunderstore.io/c/lethal-company/p/BMX/): [LobbyCompatibility](https://thunderstore.io/c/lethal-company/p/BMX/LobbyCompatibility/)
+- [MaxWasUnavailable](https://thunderstore.io/c/lethal-company/p/MaxWasUnavailable/): [LethalModDataLib](https://thunderstore.io/c/lethal-company/p/MaxWasUnavailable/LethalModDataLib/)
+- [WhiteSpike](https://thunderstore.io/c/lethal-company/p/WhiteSpike/): [Interactive Terminal API](https://thunderstore.io/c/lethal-company/p/WhiteSpike/Interactive_Terminal_API/)
+- [xilophor](https://thunderstore.io/c/lethal-company/p/xilophor/): [LethalNetworkAPI](https://thunderstore.io/c/lethal-company/p/xilophor/LethalNetworkAPI/)
+- [Sigurd](https://thunderstore.io/c/lethal-company/p/Sigurd/): [CSync](https://thunderstore.io/c/lethal-company/p/Sigurd/CSync/)
+- [tinyhoot](https://thunderstore.io/c/lethal-company/p/tinyhoot/): [ShipLoot](https://thunderstore.io/c/lethal-company/p/tinyhoot/ShipLoot/)
 - [akechii](https://thunderstore.io/c/lethal-company/p/akechii/): [DiscountAlert](https://thunderstore.io/c/lethal-company/p/akechii/DiscountAlert/)
-- [guy7cc](https://github.com/guy7cc): [LCNoPropsLost](https://github.com/guy7cc/LCNoPropsLost)
-- [dancemoon](https://github.com/quackest): [DanceTools](https://github.com/quackest/dancetools)
-- [DaXcess](https://github.com/DaXcess): [NoPenaltyReimagined](https://github.com/DaXcess/NoPenaltyReimagined)
+- [guy7cc](https://thunderstore.io/c/lethal-company/p/guy7cc/): [LCNoPropsLost](https://thunderstore.io/c/lethal-company/p/guy7cc/LCNoPropsLost/)
+- [dancemoon](https://thunderstore.io/c/lethal-company/p/dancemoon/): [DanceTools](https://thunderstore.io/c/lethal-company/p/dancemoon/DanceTools/)
+- [DaXcess](https://thunderstore.io/c/lethal-company/p/DaXcess/): [NoPenaltyReimagined](https://thunderstore.io/c/lethal-company/p/DaXcess/NoPenaltyReimagined/)
 
 ## Features
 
