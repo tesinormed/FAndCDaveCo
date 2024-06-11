@@ -17,14 +17,14 @@ public record Loan
 	public int AmountPaid;
 	[ES3NonSerializable] public int AmountUnpaid => Total - AmountPaid;
 
-	public Loan(int issuanceDate, int amount, int amountPaid = 0)
+	public Loan(int issuanceDate, int principal, int amountPaid = 0)
 	{
-		if (issuanceDate < 0) throw new ArgumentOutOfRangeException(nameof(issuanceDate), "issuance date cannot be less than zero");
-		if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount), "amount cannot be less than zero");
-		if (amountPaid < 0) throw new ArgumentOutOfRangeException(nameof(amountPaid), "amount paid cannot be less than zero");
+		if (issuanceDate < 0) throw new ArgumentOutOfRangeException(nameof(issuanceDate), "nonnegative number required");
+		if (principal < 0) throw new ArgumentOutOfRangeException(nameof(principal), "nonnegative number required");
+		if (amountPaid < 0) throw new ArgumentOutOfRangeException(nameof(amountPaid), "nonnegative number required");
 
 		IssuanceDate = issuanceDate;
-		Principal = amount;
+		Principal = principal;
 		AmountPaid = amountPaid;
 	}
 }

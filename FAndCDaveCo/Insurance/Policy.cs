@@ -12,7 +12,7 @@ public record Policy
 
 	public Policy(PolicyTier tier, int coverage)
 	{
-		if (coverage < 0) throw new ArgumentOutOfRangeException(nameof(coverage), "coverage cannot be less than zero");
+		if (coverage < 0) throw new ArgumentOutOfRangeException(nameof(coverage), "nonnegative number required");
 
 		Tier = tier;
 		Coverage = coverage;
@@ -47,14 +47,14 @@ public record Policy
 
 	public int CalculatePayout(int value)
 	{
-		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "value cannot be less than zero");
+		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "nonnegative number required");
 
 		return Math.Min(value, Coverage);
 	}
 
 	public int CalculateDeductible(int value)
 	{
-		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "value cannot be less than zero");
+		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "nonnegative number required");
 
 		return Math.Clamp(
 			(int) Math.Floor(CalculatePayout(value) * DeductiblePercent),

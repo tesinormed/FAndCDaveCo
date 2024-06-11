@@ -32,18 +32,15 @@ public class BankLoanGetTerminal : InteractiveTerminalApplication
 			return;
 		}
 
-		Loan loan = new(StartOfRound.Instance.gameStats.daysSpent, TimeOfDay.Instance.profitQuota - TimeOfDay.Instance.quotaFulfilled);
+		Loan loan = new(issuanceDate: 0 /* ignored */, principal: TimeOfDay.Instance.profitQuota - TimeOfDay.Instance.quotaFulfilled);
 		Confirm(() => GetLoan(loan), TextElement.Create($"Are you sure you want to get a loan for ${loan.Principal}? The total cost will be ${loan.Total}."));
 	}
 
 	private void GetLoan(Loan loan)
 	{
-		Plugin.BankState.SetAndSyncLoan(loan);
-		Plugin.Logger.LogDebug($"took out a loan for {loan.Principal}");
-
-		// update quota fulfillment
-		LethalClientEvent syncQuotaFulfilled = new(CreditEvents.SyncQuotaFulfilled);
-		syncQuotaFulfilled.InvokeServer();
+		// take out a loan and set quota fulfillment
+		LethalClientEvent takeOutLoan = new(CreditEvents.TakeOutLoan);
+		takeOutLoan.InvokeServer();
 
 		LockedNotification(TextElement.Create($"You have successfully taken out a loan for ${loan.Principal}."));
 	}

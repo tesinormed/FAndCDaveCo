@@ -10,7 +10,7 @@ public record PolicyClaim
 
 	public PolicyClaim(int value, bool claimed = false)
 	{
-		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "value cannot be less than zero");
+		if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "nonnegative number required");
 
 		Value = value;
 		Claimed = claimed;

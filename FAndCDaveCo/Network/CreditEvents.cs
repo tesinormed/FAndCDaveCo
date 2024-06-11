@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using LethalNetworkAPI;
+using tesinormed.FAndCDaveCo.Bank;
 using Unity.Netcode;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -11,8 +12,8 @@ public static class CreditEvents
 {
 	public const string DeductGroupCreditsIdentifier = "DeductGroupCredits";
 	public const string SpawnGoldBarIdentifier = "SpawnGoldBar";
-	public const string SyncItemScrapValues = "SyncItemScrapValues";
-	public const string SyncQuotaFulfilled = "SyncQuotaFulfilled";
+	public const string SyncItemScrapValue = "SyncItemScrapValue";
+	public const string TakeOutLoan = "TakeOutLoan";
 
 	public static void Init()
 	{
@@ -60,28 +61,33 @@ public static class CreditEvents
 			Plugin.Logger.LogDebug($"spawned gold bar with value of {value} at client {playerController.GetClientId()}");
 
 			// sync over the network
-			LethalServerMessage<Tuple<NetworkObjectReference, int>> syncItemScrapValues = new(SyncItemScrapValues);
-			syncItemScrapValues.SendAllClients(new Tuple<NetworkObjectReference, int>(gameObject.GetComponent<NetworkObject>(), value));
+			LethalServerMessage<Tuple<NetworkObjectReference, int>> syncItemScrapValue = new(SyncItemScrapValue);
+			syncItemScrapValue.SendAllClients(new Tuple<NetworkObjectReference, int>(gameObject.GetComponent<NetworkObject>(), value));
 		});
 
-		LethalClientMessage<Tuple<NetworkObjectReference, int>> syncItemScrapValues = new(SyncItemScrapValues, onReceived: value =>
+		LethalClientMessage<Tuple<NetworkObjectReference, int>> syncItemScrapValue = new(SyncItemScrapValue, onReceived: value =>
 		{
 			GameObject obj = value.Item1;
 			obj.GetComponent<GrabbableObject>().SetScrapValue(value.Item2);
 		});
 
-		LethalServerEvent syncQuotaFulfilledServer = new(SyncQuotaFulfilled, onReceived: _ =>
+		LethalServerEvent takeOutLoanServer = new(TakeOutLoan, onReceived: _ =>
 		{
+			Loan loan = new(issuanceDate: StartOfRound.Instance.gameStats.daysSpent, principal: TimeOfDay.Instance.profitQuota - TimeOfDay.Instance.quotaFulfilled);
+			Plugin.BankState.SetAndSyncLoan(loan);
+			Plugin.Logger.LogDebug($"took out a loan for {loan.Principal}");
+
 			TimeOfDay.Instance.quotaFulfilled = TimeOfDay.Instance.profitQuota;
 
-			LethalServerEvent syncQuotaFulfilled = new(SyncQuotaFulfilled);
+			LethalServerEvent syncQuotaFulfilled = new(TakeOutLoan);
 			syncQuotaFulfilled.InvokeAllClients();
 		});
 
-		LethalClientEvent syncQuotaFulfilled = new(SyncQuotaFulfilled, onReceived: () =>
+		LethalClientEvent takeOutLoan = new(TakeOutLoan, onReceived: () =>
 		{
 			TimeOfDay.Instance.quotaFulfilled = TimeOfDay.Instance.profitQuota;
 			TimeOfDay.Instance.UpdateProfitQuotaCurrentTime();
+			StartOfRound.Instance.AutoSaveShipData();
 		});
 	}
 }

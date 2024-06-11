@@ -18,6 +18,6 @@ public static class PolicyTierExtensions
 		PolicyTier.LowDeductible => "Standard",
 		PolicyTier.NoDeductible => "Bespoke",
 		PolicyTier.None => "No Policy?",
-		_ => throw new ArgumentOutOfRangeException(nameof(policyTier), $"unexpected PolicyTier: {policyTier}")
+		_ => throw new ArgumentOutOfRangeException(nameof(policyTier), $"unexpected value: {policyTier}")
 	};
 }
