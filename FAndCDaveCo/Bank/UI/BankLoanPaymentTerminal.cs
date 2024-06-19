@@ -20,7 +20,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 
 		return CursorElement.Create
 		(
-			name: $"{(int) (amount * 100)}%",
+			name: $"{(int) (amount * 100)}% (${cost})",
 			action: () => ConfirmPayLoan(cost),
 			active: _ => terminal.groupCredits >= cost,
 			selectInactive: true
