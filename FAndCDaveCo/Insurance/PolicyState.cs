@@ -52,6 +52,12 @@ public class PolicyState : ModDataContainer
 		updateClaims.SendServer(Claims);
 	}
 
+	public void ResetAndSync()
+	{
+		SetAndSyncPolicy(Policy.None);
+		UpdateAndSyncClaims(claims => claims.Clear());
+	}
+
 	public static bool DisableDeathCreditPenalty => Plugin.PolicyState.Policy.Tier != PolicyTier.None ? Plugin.Config.GameDisableDeathCreditPenalty : false;
 
 	public override string ToString()

@@ -94,14 +94,14 @@ public class Plugin : BaseUnityPlugin
 		};
 		SaveLoadEvents.PostDeleteSaveEvent += _ =>
 		{
-			PolicyState = new();
-			BankState = new();
+			PolicyState.ResetAndSync();
+			BankState.ResetAndSync();
 			HUDManagerEvents.QueuedHudTips.Clear();
 		};
 		SaveLoadEvents.PostResetSavedGameValuesEvent += () =>
 		{
-			PolicyState = new();
-			BankState = new();
+			PolicyState.ResetAndSync();
+			BankState.ResetAndSync();
 			HUDManagerEvents.QueuedHudTips.Clear();
 
 			PolicyState.Save();

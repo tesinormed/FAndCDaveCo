@@ -39,5 +39,10 @@ public class BankState : ModDataContainer
 		updateLoan.SendServer(Loan);
 	}
 
+	public void ResetAndSync()
+	{
+		SetAndSyncLoan(Loan.None);
+	}
+
 	public override string ToString() => $"BankState(loan: {Loan})";
 }
