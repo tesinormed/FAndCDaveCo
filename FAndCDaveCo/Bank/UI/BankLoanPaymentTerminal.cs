@@ -1,7 +1,6 @@
 ﻿using System;
 using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
-using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Extensions;
 using tesinormed.FAndCDaveCo.Network;
 
@@ -14,8 +13,8 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 	private CursorElement CreateCursorElement(double amount)
 	{
 		var cost = Math.Min(
-			(int) (Plugin.BankState.Loan.Total * amount),
-			Plugin.BankState.Loan.AmountUnpaid
+			(int) (Plugin.Instance.State.Loan.Total * amount),
+			Plugin.Instance.State.Loan.AmountUnpaid
 		);
 
 		return CursorElement.Create
@@ -29,7 +28,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 
 	public override void Initialization()
 	{
-		if (Plugin.BankState.Loan.Principal == 0)
+		if (Plugin.Instance.State.Loan.Principal == 0)
 		{
 			LockedNotification(TextElement.Create("You can only submit a loan payment if you have a loan."));
 			Plugin.Logger.LogDebug("local player tried to submit a loan payment when there was no loan");
@@ -64,21 +63,20 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 	private void PayLoan(int amount)
 	{
 		// deduct credits
-		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
-		deductGroupCredits.SendServer(amount);
+		CreditEvents.DeductGroupCredits.SendServer(amount);
 
-		if (Plugin.BankState.Loan.AmountUnpaid - amount == 0)
+		if (Plugin.Instance.State.Loan.AmountUnpaid - amount == 0)
 		{
-			Plugin.BankState.SetAndSyncLoan(Loan.None);
+			Plugin.Instance.State.Loan = Loan.None;
 			Plugin.Logger.LogDebug("loan paid off fully; removed");
 			LockedNotification(TextElement.Create("You have paid off your loan fully."));
 		}
 		else
 		{
 			// add to paid amount of loan
-			Plugin.BankState.UpdateAndSyncLoan(loan => loan.AmountPaid += amount);
+			Plugin.Instance.State.MutateLoan(loan => loan.AmountPaid += amount);
 			Plugin.Logger.LogDebug($"paid {amount} towards the current loan");
-			LockedNotification(TextElement.Create($"You have paid ${amount}; ${Plugin.BankState.Loan.AmountUnpaid} must still be paid."));
+			LockedNotification(TextElement.Create($"You have paid ${amount}; ${Plugin.Instance.State.Loan.AmountUnpaid} must still be paid."));
 		}
 	}
 }

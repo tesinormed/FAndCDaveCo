@@ -1,5 +1,4 @@
 ﻿using InteractiveTerminalAPI.UI;
-using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Extensions;
 using tesinormed.FAndCDaveCo.Network;
 
@@ -25,23 +24,29 @@ public class BankLoanGetTerminal : InteractiveTerminalApplication
 			return;
 		}
 
-		if (Plugin.BankState.Loan.Principal != 0)
+		if (Plugin.Instance.State.Loan.Principal != 0)
 		{
 			LockedNotification(TextElement.Create("You can only have one loan at a time."));
 			Plugin.Logger.LogDebug("local player tried to get a loan when there already was a loan");
 			return;
 		}
 
-		Loan loan = new(issuanceDate: 0 /* ignored */, principal: TimeOfDay.Instance.profitQuota - TimeOfDay.Instance.quotaFulfilled);
-		Confirm(() => GetLoan(loan), TextElement.Create($"Are you sure you want to get a loan for ${loan.Principal}? The total cost will be ${loan.Total}."));
+		if (TimeOfDay.Instance.profitQuota - TimeOfDay.Instance.quotaFulfilled <= 0)
+		{
+			LockedNotification(TextElement.Create("Your quota is already fulfilled."));
+			Plugin.Logger.LogDebug("local player tried to get a loan when quota was already fulfilled");
+			return;
+		}
+
+		var principal = TimeOfDay.Instance.profitQuota - TimeOfDay.Instance.quotaFulfilled;
+		Confirm(() => GetLoan(principal), TextElement.Create($"Are you sure you want to get a loan for ${principal}? The total cost will be ${principal + Loan.CalculateInterest(principal)}."));
 	}
 
-	private void GetLoan(Loan loan)
+	private void GetLoan(int principal)
 	{
 		// take out a loan and set quota fulfillment
-		LethalClientEvent takeOutLoan = new(CreditEvents.TakeOutLoan);
-		takeOutLoan.InvokeServer();
+		CreditEvents.TakeOutLoan.InvokeServer();
 
-		LockedNotification(TextElement.Create($"You have successfully taken out a loan for ${loan.Principal}."));
+		LockedNotification(TextElement.Create($"You have successfully taken out a loan for ${principal}."));
 	}
 }

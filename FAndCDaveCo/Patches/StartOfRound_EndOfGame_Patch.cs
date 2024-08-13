@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
-using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Bank;
 using tesinormed.FAndCDaveCo.Insurance;
 using tesinormed.FAndCDaveCo.Network;
@@ -14,7 +13,7 @@ using OpCodes = System.Reflection.Emit.OpCodes;
 namespace tesinormed.FAndCDaveCo.Patches;
 
 [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.EndOfGame))]
-public static class StartOfRound_EndOfGame_Patch
+internal static class StartOfRound_EndOfGame_Patch
 {
 	public static void Prefix(ref StartOfRound __instance)
 	{
@@ -22,68 +21,63 @@ public static class StartOfRound_EndOfGame_Patch
 		if (__instance is { IsServer: true, isChallengeFile: false })
 		{
 			// garbage collect old claims
-			foreach (var keyValuePair in Plugin.PolicyState.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Config.ClaimRetentionDays))
+			foreach (var keyValuePair in Plugin.Instance.State.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Instance.Config.ClaimRetentionDays))
 			{
-				Plugin.PolicyState.UpdateAndSyncClaims(claims => claims.Remove(keyValuePair.Key));
-				Plugin.Logger.LogInfo($"deleted old claim from day {keyValuePair.Key}: {keyValuePair.Value}");
+				Plugin.Instance.State.MutateClaims(claims => claims.Remove(keyValuePair.Key));
+				Plugin.Logger.LogDebug($"deleted old claim from day {keyValuePair.Key}: {keyValuePair.Value}");
 			}
 
 			// make sure there's a policy
-			if (Plugin.PolicyState.Policy != Policy.None)
+			if (Plugin.Instance.State.Policy != Policy.None)
 			{
 				// make sure that the credits are sufficient for the premium payment
-				if (Plugin.Terminal.groupCredits >= Plugin.PolicyState.TotalPremium)
+				if (Plugin.Terminal.groupCredits >= Plugin.Instance.State.TotalPremium)
 				{
 					// deduct premium payment
-					LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
-					deductGroupCredits.SendServer(Plugin.PolicyState.TotalPremium);
+					CreditEvents.DeductGroupCredits.SendServer(Plugin.Instance.State.TotalPremium);
 
-					// notify all of the successful renewal
-					LethalServerMessage<int> insuranceRenewalSuccess = new(HUDManagerEvents.InsuranceRenewalSuccessIdentifier);
-					insuranceRenewalSuccess.SendAllClients(Plugin.PolicyState.TotalPremium);
+					// notify everyone about the successful renewal
+					HUDManagerEvents.InsuranceRenewalSuccess.SendClients(Plugin.Instance.State.TotalPremium);
 
-					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.PolicyState.TotalPremium}");
+					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.Instance.State.TotalPremium}");
 				}
 				else
 				{
 					// cancel policy
-					Plugin.PolicyState.SetAndSyncPolicy(Policy.None);
+					Plugin.Instance.State.Policy = Policy.None;
 
-					// notify all of the failed renewal
-					LethalServerEvent insuranceRenewalFail = new(HUDManagerEvents.InsuranceRenewalFailIdentifier);
-					insuranceRenewalFail.InvokeAllClients();
+					// notify everyone about the failed renewal
+					HUDManagerEvents.InsuranceRenewalFail.InvokeClients();
 
 					Plugin.Logger.LogDebug("insurance failed to renew");
 				}
 			}
 
 			// check if there's an unpaid loan and if it's been more than the set amount of days
-			if (Plugin.BankState.Loan.AmountUnpaid > 0 && Plugin.BankState.Loan.DaysSinceIssuance >= Plugin.Config.PenaltyStartDaysFromIssuance)
+			if (Plugin.Instance.State.Loan.AmountUnpaid > 0 && Plugin.Instance.State.Loan.DaysSinceIssuance >= Plugin.Instance.Config.PenaltyStartDaysFromIssuance)
 			{
 				var amountGarnished = Math.Min(
-					(int) (Plugin.Terminal.groupCredits * Plugin.Config.PenaltyAmount),
-					Plugin.BankState.Loan.AmountUnpaid
+					(int) (Plugin.Terminal.groupCredits * Plugin.Instance.Config.PenaltyAmount),
+					Plugin.Instance.State.Loan.AmountUnpaid
 				);
 
 				// credit garnishment
-				LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
-				deductGroupCredits.SendServer(amountGarnished);
+				CreditEvents.DeductGroupCredits.SendServer(amountGarnished);
 				Plugin.Logger.LogDebug($"garnished ${amountGarnished} from group credits due to loan nonpayment");
 
-				if (Plugin.BankState.Loan.AmountUnpaid - amountGarnished == 0)
+				if (Plugin.Instance.State.Loan.AmountUnpaid - amountGarnished == 0)
 				{
-					Plugin.BankState.SetAndSyncLoan(Loan.None);
+					Plugin.Instance.State.Loan = Loan.None;
 					Plugin.Logger.LogDebug("loan fully paid off due to garnishment");
 				}
 				else
 				{
-					Plugin.BankState.UpdateAndSyncLoan(loan => loan.AmountPaid += amountGarnished);
+					Plugin.Instance.State.Loan = Plugin.Instance.State.Loan with { AmountPaid = Plugin.Instance.State.Loan.AmountPaid + amountGarnished };
 					Plugin.Logger.LogDebug($"loan amount paid increased by {amountGarnished}");
 				}
 
-				// notify all of the credits garnishing
-				LethalServerMessage<int> bankLoanCreditsGarnished = new(HUDManagerEvents.BankLoanCreditsGarnishedIdentifier);
-				bankLoanCreditsGarnished.SendAllClients(amountGarnished);
+				// notify everyone about the credits garnishing
+				HUDManagerEvents.BankLoanCreditsGarnished.SendClients(amountGarnished);
 			}
 		}
 	}
@@ -91,16 +85,21 @@ public static class StartOfRound_EndOfGame_Patch
 	[HarmonyPatch(MethodType.Enumerator)]
 	public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
 	{
+		// search for the right part of the method to insert our instructions into
 		var codeMatcher = new CodeMatcher(instructions, generator)
+			// search forwards until we see the method to apply the penalty
 			.SearchForward(instruction => instruction.Calls(Method(typeof(HUDManager), nameof(HUDManager.ApplyPenalty))))
+			// search backwards until we see the check for if it's a challenge file
 			.SearchBack(instruction => instruction.LoadsField(Field(typeof(StartOfRound), nameof(StartOfRound.isChallengeFile))))
+			// search forwards until we see the comparison to true
 			.SearchForward(instruction => instruction.opcode == OpCodes.Brtrue);
 		var label = codeMatcher.Operand;
 
 		return codeMatcher
 			.Advance(1)
 			.InsertAndAdvance(
-				new(OpCodes.Call, PropertyGetter(typeof(PolicyState), nameof(PolicyState.DisableDeathCreditPenalty))),
+				// tesinormed.FAndCDaveCo.State.DisableDeathCreditPenalty == true
+				new(OpCodes.Call, PropertyGetter(typeof(State), nameof(State.DisableDeathCreditPenalty))),
 				new(OpCodes.Brtrue, label)
 			)
 			.InstructionEnumeration();
@@ -108,7 +107,7 @@ public static class StartOfRound_EndOfGame_Patch
 
 	public static IEnumerator Postfix(IEnumerator values, StartOfRound __instance)
 	{
-		// return all of the previous values
+		// return all previous values
 		do
 		{
 			yield return values.Current;
@@ -120,9 +119,8 @@ public static class StartOfRound_EndOfGame_Patch
 			// make sure we aren't getting fired
 			if (!(TimeOfDay.Instance.timeUntilDeadline <= 0.0))
 			{
-				// run all of the queued HUD tips
-				LethalServerEvent runQueuedHudTips = new(HUDManagerEvents.RunQueuedHudTipsIdentifier);
-				runQueuedHudTips.InvokeAllClients();
+				// show all queued HUD tips
+				HUDManagerEvents.RunShowQueuedHudTips.InvokeClients();
 			}
 		}
 	}

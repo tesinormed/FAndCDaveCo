@@ -2,5 +2,5 @@
 
 internal static class BankTerminal
 {
-	internal const string Title = "F&C Dave Co. Banking";
+	internal const string Title = "F&C Dave Co. Bank";
 }

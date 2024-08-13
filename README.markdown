@@ -42,7 +42,7 @@ Thank you to the following people / groups for inspiration, documentation, libra
 				- Base premium is 35% of the coverage
 				- No deductibles
 			- **Premium will increase by 25% every time it is used, based on usage within the past 10 days**
-		- Coverage options are ▮150, ▮400, ▮800, ▮1500, ▮2250, ▮3600, ▮5500, ▮8000, ▮11125, ▮15250, ▮18000
+		- Coverage options (in credits) are 150, 400, 800, 1500, 2250, 3600, 5500, 8000, 11125, 15250, 18000
 	- Make a claim using the terminal when you lose all your loot due to full crew death
 		- You must pay the deductible if your policy tier requires it
 		- A gold bar with the value of the lost scrap (maximum is the coverage amount) will be given to you
@@ -76,9 +76,9 @@ Thank you to the following people / groups for inspiration, documentation, libra
 	- You must not have an unpaid loan
 - `bank loan pay`, `bank loan payment`
 	- Pay the current loan off
-	- Can either be in full or only a specific percent of the loan amount
+	- You can pay either in full or only a specific percent of the loan amount
 	- You must have an unpaid loan
 
 ## Contact
 
-Please use the [GitHub issue tracker](https://github.com/tesinormed/FAndCDaveCo) for any issues, requests, or inquiries.
+Please use the [GitHub issue tracker](https://github.com/tesinormed/FAndCDaveCo/issues) for any issues, requests, or inquiries.

@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
-using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Extensions;
 using tesinormed.FAndCDaveCo.Network;
 
@@ -11,7 +10,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 {
 	protected override string Title => $"{PolicyTerminal.Title}: Make a claim";
 
-	private CursorElement CreateCursorElement(int day, PolicyClaim claim) => CursorElement.Create
+	private CursorElement CreateCursorElement(int day, Claim claim) => CursorElement.Create
 	(
 		name: $"Day {day}: ${claim.Value}",
 		action: () => ConfirmClaim(day, claim),
@@ -22,14 +21,14 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 	public override void Initialization()
 	{
 		// no policy
-		if (Plugin.PolicyState.Policy.Tier == PolicyTier.None)
+		if (Plugin.Instance.State.Policy.Tier == PolicyTier.None)
 		{
 			LockedNotification(TextElement.Create("You do not have an active insurance policy."));
 			return;
 		}
 
 		// no claims
-		if (Plugin.PolicyState.UnclaimedClaims.Count == 0)
+		if (Plugin.Instance.State.UnclaimedClaims.Count == 0)
 		{
 			LockedNotification(TextElement.Create("You do not have any claims."));
 			return;
@@ -37,14 +36,14 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 
 		// make a cursor element for each claim
 		CursorElement[] cursorElements = [];
-		cursorElements = Plugin.PolicyState.UnclaimedClaims.Aggregate(cursorElements, (current, pair) => [.. current, CreateCursorElement(pair.Key, pair.Value)]);
+		cursorElements = Plugin.Instance.State.UnclaimedClaims.Aggregate(cursorElements, (current, pair) => [.. current, CreateCursorElement(pair.Key, pair.Value)]);
 		(MainScreen, MainCursorMenu) = Selection(prompt: "Select a pending claim.", cursorElements);
 	}
 
-	private void ConfirmClaim(int day, PolicyClaim claim)
+	private void ConfirmClaim(int day, Claim claim)
 	{
-		var deductible = Plugin.PolicyState.Policy.CalculateDeductible(claim.Value);
-		var payout = Plugin.PolicyState.Policy.CalculatePayout(claim.Value);
+		var deductible = Plugin.Instance.State.Policy.CalculateDeductible(claim.Value);
+		var payout = Plugin.Instance.State.Policy.CalculatePayout(claim.Value);
 
 		Confirm(
 			confirmAction: () => ProcessClaim(day, deductible, payout, claim),
@@ -65,12 +64,12 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 
 	private void DeleteClaim(int day)
 	{
-		Plugin.PolicyState.UpdateAndSyncClaims(claims => claims.Remove(day));
+		Plugin.Instance.State.MutateClaims(claims => claims.Remove(day));
 
 		LockedNotification(TextElement.Create($"The claim for day {day} has been deleted."));
 	}
 
-	private void ProcessClaim(int day, int deductible, int payout, PolicyClaim claim)
+	private void ProcessClaim(int day, int deductible, int payout, Claim claim)
 	{
 		// make sure enough credits for deductible
 		if (terminal.groupCredits < deductible)
@@ -79,20 +78,18 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 			return;
 		}
 
-		Plugin.PolicyState.UpdateAndSyncClaims(claims => claims[day] = new(claim.Value, claimed: true));
+		Plugin.Instance.State.MutateClaims(claims => claims[day] = new(claim.Value, claimed: true));
 
 		// deduct credits
-		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
-		deductGroupCredits.SendServer(deductible);
+		CreditEvents.DeductGroupCredits.SendServer(deductible);
 
 		// spawn bar with value of payout
-		LethalClientMessage<int> spawnGoldBar = new(CreditEvents.SpawnGoldBarIdentifier);
-		spawnGoldBar.SendServer(payout);
+		CreditEvents.SpawnGoldBar.SendServer(payout);
 
 		LockedNotification(
 			TextElement.Create($"You have been given a gold bar worth ${payout}."),
 			TextElement.Create($"You have been charged ${deductible}."),
-			TextElement.Create($"Your premiums have increased by {(int) (Plugin.PolicyState.FractionalPremiumIncrease * 100)}%.")
+			TextElement.Create($"Your premiums have increased by {(int) (Plugin.Instance.State.FractionalPremiumIncrease * 100)}%.")
 		);
 	}
 }

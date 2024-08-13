@@ -8,26 +8,28 @@ namespace tesinormed.FAndCDaveCo.Network;
 
 public static class HUDManagerEvents
 {
-	public const string InsuranceRenewalSuccessIdentifier = "InsuranceRenewalSuccess";
-	public const string InsuranceRenewalFailIdentifier = "InsuranceRenewalFail";
-	public const string InsuranceClaimAvailableIdentifier = "ClaimAvailable";
-	public const string BankLoanCreditsGarnishedIdentifier = "BankLoanCreditsGarnished";
-	public const string RunQueuedHudTipsIdentifier = "RunQueuedHudTips";
+	public static LNetworkMessage<int> InsuranceRenewalSuccess = null!;
+	public static LNetworkEvent InsuranceRenewalFail = null!;
 
+	public static LNetworkEvent InsuranceClaimAvailable = null!;
+
+	public static LNetworkMessage<int> BankLoanCreditsGarnished = null!;
+
+	public static LNetworkEvent RunShowQueuedHudTips = null!;
 	internal static readonly List<Action> QueuedHudTips = [];
 
-	public static void Init()
+	internal static void Init()
 	{
-		LethalClientMessage<int> insuranceRenewalSuccess = new(InsuranceRenewalSuccessIdentifier, onReceived: value =>
+		InsuranceRenewalSuccess = LNetworkMessage<int>.Connect("InsuranceRenewalSuccess", onClientReceived: value =>
 		{
 			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Insurance renewed",
-				$"\u25ae{value} has been deducted.",
+				$"{value} credits have been deducted.",
 				isWarning: false
 			));
 			Plugin.Logger.LogDebug("queued insurance renewal success on HUD");
 		});
-		LethalClientEvent insuranceRenewalFail = new(InsuranceRenewalFailIdentifier, onReceived: () =>
+		InsuranceRenewalFail = LNetworkEvent.Connect("InsuranceRenewalFail", onClientReceived: () =>
 		{
 			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Insurance canceled",
@@ -37,7 +39,7 @@ public static class HUDManagerEvents
 			Plugin.Logger.LogDebug("queued insurance renewal fail on HUD");
 		});
 
-		LethalClientEvent insuranceClaimAvailable = new(InsuranceClaimAvailableIdentifier, onReceived: () =>
+		InsuranceClaimAvailable = LNetworkEvent.Connect("InsuranceClaimAvailable", onClientReceived: () =>
 		{
 			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Insurance claim",
@@ -47,20 +49,20 @@ public static class HUDManagerEvents
 			Plugin.Logger.LogDebug("queued insurance claim available on HUD");
 		});
 
-		LethalClientMessage<int> bankLoanCreditsGarnished = new(BankLoanCreditsGarnishedIdentifier, onReceived: value =>
+		BankLoanCreditsGarnished = LNetworkMessage<int>.Connect("BankLoanCreditsGarnished", onClientReceived: value =>
 		{
 			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Credits garnished",
-				$"Due to loan nonpayment, {(int) (Plugin.Config.PenaltyAmount * 100)}% of your credits (\u25ae{value}) have been garnished.",
+				$"Due to loan nonpayment, {(int) (Plugin.Instance.Config.PenaltyAmount * 100)}% of your credits (\u25ae{value}) have been garnished.",
 				isWarning: true
 			));
 			Plugin.Logger.LogDebug("queued loan credit garnishing warning on HUD");
 		});
 
-		LethalClientEvent runQueuedHudTips = new(RunQueuedHudTipsIdentifier, onReceived: () => { HUDManager.Instance.StartCoroutine(RunQueuedHudTips()); });
+		RunShowQueuedHudTips = LNetworkEvent.Connect("RunShowQueuedHudTips", onClientReceived: () => { HUDManager.Instance.StartCoroutine(ShowQueuedHudTips()); });
 	}
 
-	private static IEnumerator RunQueuedHudTips()
+	private static IEnumerator ShowQueuedHudTips()
 	{
 		for (var index = 0; index < QueuedHudTips.Count; index++)
 		{

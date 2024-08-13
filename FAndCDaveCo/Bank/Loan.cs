@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace tesinormed.FAndCDaveCo.Bank;
 
@@ -11,7 +12,8 @@ public record Loan
 	[ES3NonSerializable] public int DaysSinceIssuance => StartOfRound.Instance.gameStats.daysSpent - IssuanceDate;
 
 	public int Principal;
-	[ES3NonSerializable] public int Interest => (int) (Principal * Plugin.Config.InterestAmount);
+	[ES3NonSerializable] public int Interest => CalculateInterest(Principal);
+	public static int CalculateInterest(int principal) => (int) (principal * Plugin.Instance.Config.InterestAmount);
 	[ES3NonSerializable] public int Total => Principal + Interest;
 
 	public int AmountPaid;
@@ -26,5 +28,18 @@ public record Loan
 		IssuanceDate = issuanceDate;
 		Principal = principal;
 		AmountPaid = amountPaid;
+	}
+
+	public override string ToString()
+	{
+		var builder = new StringBuilder();
+
+		builder.Append($"{nameof(Loan)} {{ ");
+		builder.Append($"{nameof(IssuanceDate)} = {IssuanceDate}, ");
+		builder.Append($"{nameof(Principal)} = {Principal}, ");
+		builder.Append($"{nameof(AmountPaid)} = {AmountPaid}");
+		builder.Append(" }");
+
+		return builder.ToString();
 	}
 }

@@ -11,11 +11,11 @@ public abstract class InteractiveTerminalApplication : InteractiveTerminalAPI.UI
 
 	protected IScreen MainScreen { get; set; } = null!;
 	protected CursorMenu MainCursorMenu { get; set; } = null!;
-	private new IScreen PreviousScreen { get; set; } = null!;
-	private CursorMenu PreviousCursorMenu { get; set; } = null!;
+	private new IScreen? PreviousScreen { get; set; }
+	private CursorMenu? PreviousCursorMenu { get; set; }
 
 	protected Action PreviousMainScreenAction => () => SwitchScreen(MainScreen, MainCursorMenu, previous: true);
-	protected Action PreviousScreenAction => () => SwitchScreen(PreviousScreen, PreviousCursorMenu, previous: true);
+	protected Action PreviousScreenAction => () => SwitchScreen(PreviousScreen ?? throw new InvalidOperationException("no previous screen"), PreviousCursorMenu ?? throw new InvalidOperationException("no previous cursor menu"), previous: true);
 
 	protected override void SwitchScreen(IScreen screen, CursorMenu cursorMenu, bool previous)
 	{

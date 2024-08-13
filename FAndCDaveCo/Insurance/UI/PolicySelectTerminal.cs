@@ -1,6 +1,5 @@
 ﻿using InteractiveTerminalAPI.UI;
 using InteractiveTerminalAPI.UI.Cursor;
-using LethalNetworkAPI;
 using tesinormed.FAndCDaveCo.Extensions;
 using tesinormed.FAndCDaveCo.Network;
 
@@ -19,17 +18,11 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 	);
 	private CursorElement CreateCoverageCursorElement(Policy policy)
 	{
-		var policyState = new PolicyState
-		{
-			Policy = policy,
-			Claims = Plugin.PolicyState.Claims
-		};
-
 		return CursorElement.Create
 		(
 			name: $"${policy.Coverage}",
-			action: () => ConfirmEverything(policyState),
-			active: _ => terminal.groupCredits >= policyState.TotalPremium,
+			action: () => ConfirmEverything(policy),
+			active: _ => terminal.groupCredits >= Plugin.Instance.State.CalculateTotalPremium(policy),
 			selectInactive: true
 		);
 	}
@@ -49,14 +42,14 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 			CreatePolicyTierCursorElement(PolicyTier.HighDeductible, "High deductible, low premium"),
 			CreatePolicyTierCursorElement(PolicyTier.LowDeductible, "Low deductible, medium premium"),
 			CreatePolicyTierCursorElement(PolicyTier.NoDeductible, "No deductible, high premium"),
-			CursorElement.Create(name: "Cancel policy", action: ConfirmCancelPolicy, active: _ => Plugin.PolicyState.Policy.Tier != PolicyTier.None, selectInactive: true)
+			CursorElement.Create(name: "Cancel policy", action: ConfirmCancelPolicy, active: _ => Plugin.Instance.State.Policy.Tier != PolicyTier.None, selectInactive: true)
 		);
 	}
 
 	private void ConfirmCancelPolicy()
 	{
 		// make sure enough credits for initial premium payment
-		if (Plugin.PolicyState.Policy.Tier == PolicyTier.None)
+		if (Plugin.Instance.State.Policy.Tier == PolicyTier.None)
 		{
 			Notification(backAction: PreviousScreenAction, TextElement.Create("You do not currently have a policy."));
 			return;
@@ -66,13 +59,13 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 			confirmAction: CancelPolicy,
 			declineAction: PreviousScreenAction,
 			TextElement.Create("Are you sure you want to cancel your current policy?"),
-			TextElement.Create($"Your current policy is {Plugin.PolicyState.Policy.Tier.ToFriendlyString()} (${Plugin.PolicyState.Policy.Coverage}).")
+			TextElement.Create($"Your current policy is {Plugin.Instance.State.Policy.Tier.ToFriendlyString()} (${Plugin.Instance.State.Policy.Coverage}).")
 		);
 	}
 
 	private void CancelPolicy()
 	{
-		Plugin.PolicyState.SetAndSyncPolicy(Policy.None);
+		Plugin.Instance.State.Policy = Policy.None;
 
 		LockedNotification(TextElement.Create("Your policy has been canceled."));
 	}
@@ -82,53 +75,52 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 		SelectionWithBack(
 			prompt: "Select the coverage amount.",
 			backAction: PreviousMainScreenAction,
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption00)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption01)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption02)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption03)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption04)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption05)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption06)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption07)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption08)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption09)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Config.CoverageOption10))
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption00)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption01)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption02)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption03)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption04)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption05)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption06)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption07)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption08)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption09)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption10))
 		);
 	}
 
-	private void ConfirmEverything(PolicyState state)
+	private void ConfirmEverything(Policy policy)
 	{
 		// make sure policy is not the same as the current one
-		if (state.Policy == Plugin.PolicyState.Policy)
+		if (policy == Plugin.Instance.State.Policy)
 		{
 			Notification(backAction: PreviousScreenAction, TextElement.Create("You already have this policy."));
 			return;
 		}
 
 		// make sure enough credits for initial premium payment
-		if (terminal.groupCredits < state.TotalPremium)
+		if (terminal.groupCredits < Plugin.Instance.State.CalculateTotalPremium(policy))
 		{
 			Notification(backAction: PreviousScreenAction, TextElement.Create("You do not have enough credits to purchase this policy."));
 			return;
 		}
 
 		Confirm(
-			confirmAction: () => SetEverything(state.Policy, state.TotalPremium),
+			confirmAction: () => SetEverything(policy, Plugin.Instance.State.CalculateTotalPremium(policy)),
 			declineAction: PreviousScreenAction,
-			TextElement.Create($"Are you sure you want to pick {state.Policy.Tier.ToFriendlyString()} (${state.Policy.Coverage})?"),
-			TextElement.Create(state.Policy.DeductiblePercent == 0.00
+			TextElement.Create($"Are you sure you want to pick {policy.Tier.ToFriendlyString()} (${policy.Coverage})?"),
+			TextElement.Create(policy.DeductiblePercent == 0.00
 				? "This policy has no deductibles."
-				: $"The deductibles are {(int) (state.Policy.DeductiblePercent * 100)}%, with a minimum of ${state.Policy.DeductibleMinimum} and a maximum of ${state.Policy.DeductibleMaximum}."),
-			TextElement.Create($"You will be charged ${state.TotalPremium}.")
+				: $"The deductibles are {(int) (policy.DeductiblePercent * 100)}%, with a minimum of ${policy.DeductibleMinimum} and a maximum of ${policy.DeductibleMaximum}."),
+			TextElement.Create($"You will be charged ${Plugin.Instance.State.CalculateTotalPremium(policy)}.")
 		);
 	}
 
 	private void SetEverything(Policy policy, int cost)
 	{
-		Plugin.PolicyState.SetAndSyncPolicy(policy);
+		Plugin.Instance.State.Policy = policy;
 
-		LethalClientMessage<int> deductGroupCredits = new(CreditEvents.DeductGroupCreditsIdentifier);
-		deductGroupCredits.SendServer(cost);
+		CreditEvents.DeductGroupCredits.SendServer(cost);
 
 		LockedNotification(
 			TextElement.Create($"Your policy has been updated to {policy.Tier.ToFriendlyString()} (${policy.Coverage})."),
