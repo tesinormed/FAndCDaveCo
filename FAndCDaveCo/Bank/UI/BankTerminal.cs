@@ -1,4 +1,4 @@
-﻿namespace tesinormed.FAndCDaveCo.Bank.UI;
+namespace tesinormed.FAndCDaveCo.Bank.UI;
 
 internal static class BankTerminal
 {

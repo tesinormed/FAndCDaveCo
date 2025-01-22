@@ -1,4 +1,4 @@
-﻿namespace tesinormed.FAndCDaveCo.Insurance.UI;
+namespace tesinormed.FAndCDaveCo.Insurance.UI;
 
 internal static class PolicyTerminal
 {

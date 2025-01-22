@@ -1,4 +1,4 @@
-﻿namespace tesinormed.FAndCDaveCo.Extensions;
+namespace tesinormed.FAndCDaveCo.Extensions;
 
 public static class InteractiveTerminalManager
 {

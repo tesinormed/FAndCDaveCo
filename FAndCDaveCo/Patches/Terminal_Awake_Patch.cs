@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 
 namespace tesinormed.FAndCDaveCo.Patches;
 

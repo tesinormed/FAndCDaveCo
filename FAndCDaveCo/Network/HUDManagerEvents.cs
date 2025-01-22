@@ -53,7 +53,7 @@ public static class HUDManagerEvents
 		{
 			QueuedHudTips.Add(() => HUDManager.Instance.DisplayTip(
 				"Credits garnished",
-				$"Due to loan nonpayment, {(int) (Plugin.Instance.Config.PenaltyAmount * 100)}% of your credits (\u25ae{value}) have been garnished.",
+				$"Due to loan nonpayment, {(int) (Plugin.Instance.Config.PenaltyAmount.Value * 100)}% of your credits (\u25ae{value}) have been garnished.",
 				isWarning: true
 			));
 			Plugin.Logger.LogDebug("queued loan credit garnishing warning on HUD");

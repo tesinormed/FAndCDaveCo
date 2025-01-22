@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -21,10 +20,10 @@ internal static class StartOfRound_EndOfGame_Patch
 		if (__instance is { IsServer: true, isChallengeFile: false })
 		{
 			// garbage collect old claims
-			foreach (var keyValuePair in Plugin.Instance.State.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Instance.Config.ClaimRetentionDays))
+			foreach (var pair in Plugin.Instance.State.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Instance.Config.ClaimRetentionDays.Value))
 			{
-				Plugin.Instance.State.MutateClaims(claims => claims.Remove(keyValuePair.Key));
-				Plugin.Logger.LogDebug($"deleted old claim from day {keyValuePair.Key}: {keyValuePair.Value}");
+				Plugin.Instance.State.MutateClaims(claims => claims.Remove(pair.Key));
+				Plugin.Logger.LogDebug($"deleted old claim from day {pair.Key}");
 			}
 
 			// make sure there's a policy
@@ -54,10 +53,10 @@ internal static class StartOfRound_EndOfGame_Patch
 			}
 
 			// check if there's an unpaid loan and if it's been more than the set amount of days
-			if (Plugin.Instance.State.Loan.AmountUnpaid > 0 && Plugin.Instance.State.Loan.DaysSinceIssuance >= Plugin.Instance.Config.PenaltyStartDaysFromIssuance)
+			if (Plugin.Instance.State.Loan.AmountUnpaid > 0 && Plugin.Instance.State.Loan.DaysSinceIssuance >= Plugin.Instance.Config.PenaltyStartDaysFromIssuance.Value)
 			{
-				var amountGarnished = Math.Min(
-					(int) (Plugin.Terminal.groupCredits * Plugin.Instance.Config.PenaltyAmount),
+				var amountGarnished = System.Math.Min(
+					(int) (Plugin.Terminal.groupCredits * Plugin.Instance.Config.PenaltyAmount.Value),
 					Plugin.Instance.State.Loan.AmountUnpaid
 				);
 

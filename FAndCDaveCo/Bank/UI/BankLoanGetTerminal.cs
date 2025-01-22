@@ -1,4 +1,4 @@
-﻿using InteractiveTerminalAPI.UI;
+using InteractiveTerminalAPI.UI;
 using tesinormed.FAndCDaveCo.Extensions;
 using tesinormed.FAndCDaveCo.Network;
 

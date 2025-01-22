@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace tesinormed.FAndCDaveCo.Insurance;
 
-[ES3Serializable]
-public record Claim
+public record struct Claim
 {
 	public int Value;
 	public bool Claimed;
@@ -20,12 +19,10 @@ public record Claim
 	public override string ToString()
 	{
 		var builder = new StringBuilder();
-
 		builder.Append($"{nameof(Claim)} {{ ");
 		builder.Append($"{nameof(Value)} = {Value}, ");
 		builder.Append($"{nameof(Claimed)} = {Claimed}");
 		builder.Append(" }");
-
 		return builder.ToString();
 	}
 }

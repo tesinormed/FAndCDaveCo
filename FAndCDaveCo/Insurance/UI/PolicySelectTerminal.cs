@@ -75,17 +75,17 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 		SelectionWithBack(
 			prompt: "Select the coverage amount.",
 			backAction: PreviousMainScreenAction,
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption00)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption01)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption02)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption03)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption04)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption05)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption06)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption07)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption08)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption09)),
-			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption10))
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption00.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption01.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption02.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption03.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption04.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption05.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption06.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption07.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption08.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption09.Value)),
+			CreateCoverageCursorElement(policyTier.CreatePolicy(Plugin.Instance.Config.CoverageOption10.Value))
 		);
 	}
 

@@ -78,7 +78,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 			return;
 		}
 
-		Plugin.Instance.State.MutateClaims(claims => claims[day] = new(claim.Value, claimed: true));
+		Plugin.Instance.State.MutateClaims(claims => claims[day] = claim with { Claimed = true });
 
 		// deduct credits
 		CreditEvents.DeductGroupCredits.SendServer(deductible);

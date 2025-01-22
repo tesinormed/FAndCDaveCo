@@ -13,7 +13,7 @@ namespace tesinormed.FAndCDaveCo.Network;
 public record State
 {
 	#region Game
-	public static bool DisableDeathCreditPenalty => Plugin.Instance.State.Policy.Tier != PolicyTier.None ? Plugin.Instance.Config.GameDisableDeathCreditPenalty : false;
+	public static bool DisableDeathCreditPenalty => Plugin.Instance.State.Policy.Tier != PolicyTier.None && Plugin.Instance.Config.GameDisableDeathCreditPenalty.Value;
 	#endregion
 
 	#region Insurance
@@ -28,14 +28,14 @@ public record State
 		set => _policy.Value = value;
 	}
 
-	private readonly LNetworkVariable<Dictionary<int, Claim>> _claims = LNetworkVariable<Dictionary<int, Claim>>.Connect(
+	private readonly LNetworkVariable<Dictionary<int, Claim>?> _claims = LNetworkVariable<Dictionary<int, Claim>?>.Connect(
 		identifier: nameof(Claims),
 		writePerms: LNetworkVariableWritePerms.Everyone,
 		onValueChanged: (previous, current) => { Plugin.Logger.LogDebug($"{nameof(Claims)} changed from ({string.Join(", ", previous ?? [])}) to ({string.Join(", ", current ?? [])})"); }
 	);
 	public Dictionary<int, Claim> Claims
 	{
-		get => _claims.Value;
+		get => _claims.Value ?? [];
 		set => _claims.Value = value;
 	}
 	public void MutateClaims(Action<Dictionary<int, Claim>> mutation)
@@ -47,7 +47,7 @@ public record State
 	public Dictionary<int, Claim> ClaimedClaims => Claims.Where(pair => pair.Value.Claimed).ToDictionary();
 	public Dictionary<int, Claim> UnclaimedClaims => Claims.Where(pair => !pair.Value.Claimed).ToDictionary();
 
-	public double FractionalPremiumIncrease => ClaimedClaims.Count * Plugin.Instance.Config.ClaimPremiumIncrease;
+	public double FractionalPremiumIncrease => ClaimedClaims.Count * Plugin.Instance.Config.ClaimPremiumIncrease.Value;
 	public int TotalPremium => CalculateTotalPremium(Policy.BasePremium);
 	internal int CalculateTotalPremium(Policy policy) => CalculateTotalPremium(policy.BasePremium);
 	private int CalculateTotalPremium(int basePremium) => (int) (basePremium * (1.00 + FractionalPremiumIncrease));
@@ -78,15 +78,17 @@ public record State
 
 		SaveLoadHandler.SaveData(Loan, nameof(Loan));
 	}
+
 	internal void Load()
 	{
 		if (!LNetworkUtils.IsHostOrServer) return;
 
-		Policy = SaveLoadHandler.LoadData(nameof(Policy), defaultValue: Policy.None)!;
-		Claims = SaveLoadHandler.LoadData(nameof(Claims), defaultValue: new Dictionary<int, Claim>())!;
+		Policy = SaveLoadHandler.LoadData(nameof(Policy), defaultValue: Policy.None);
+		Claims = SaveLoadHandler.LoadData<Dictionary<int, Claim>>(nameof(Claims)) ?? [];
 
-		Loan = SaveLoadHandler.LoadData(nameof(Loan), defaultValue: Loan.None)!;
+		Loan = SaveLoadHandler.LoadData(nameof(Loan), defaultValue: Loan.None);
 	}
+
 	internal void Reset()
 	{
 		Policy = Policy.None;
@@ -94,6 +96,7 @@ public record State
 
 		Loan = Loan.None;
 	}
+
 	internal void MakeDirty()
 	{
 		_policy.MakeDirty();
