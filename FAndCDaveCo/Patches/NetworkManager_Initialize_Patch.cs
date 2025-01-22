@@ -9,6 +9,9 @@ internal static class NetworkManager_Initialize_Patch
 {
 	public static void Postfix(ref NetworkManager __instance)
 	{
-		if (LNetworkUtils.IsHostOrServer) __instance.OnClientConnectedCallback += _ => { Plugin.Instance.State.MakeDirty(); };
+		if (LNetworkUtils.IsHostOrServer)
+		{
+			__instance.OnClientConnectedCallback += _ => { Plugin.Instance.State.MakeDirty(); };
+		}
 	}
 }

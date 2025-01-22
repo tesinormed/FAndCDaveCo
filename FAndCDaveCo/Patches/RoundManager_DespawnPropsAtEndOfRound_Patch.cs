@@ -19,7 +19,6 @@ internal static class RoundManager_DespawnPropsAtEndOfRound_Patch
 			var totalScrapValue = GameObject.Find("/Environment/HangarShip").GetComponentsInChildren<GrabbableObject>()
 				.Where(grabbableObject => grabbableObject.itemProperties.isScrap && grabbableObject is not RagdollGrabbableObject)
 				.Sum(grabbableObject => grabbableObject.scrapValue);
-
 			// make sure there was at least some scrap
 			if (totalScrapValue > 0)
 			{

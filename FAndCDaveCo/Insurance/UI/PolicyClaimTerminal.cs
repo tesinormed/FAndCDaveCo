@@ -49,6 +49,7 @@ public class PolicyClaimTerminal : InteractiveTerminalApplication
 			confirmAction: () => ProcessClaim(day, deductible, payout, claim),
 			declineAction: () => ConfirmDeleteClaim(day),
 			TextElement.Create($"Are you sure you want to confirm this claim? You will need to pay a deductible of ${deductible}."),
+			TextElement.Create($"Your premiums will increase by {(int) (Plugin.Instance.State.FractionalPremiumIncrease * 100)}%."),
 			TextElement.Create($"You will be given back ${payout}.")
 		);
 	}

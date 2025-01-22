@@ -22,7 +22,6 @@ public class PolicyInformationTerminal : TerminalApplication
 				? TextElement.Create($"You pay ${Plugin.Instance.State.TotalPremium} per day.")
 				// show only if premium is increased
 				: TextElement.Create($"You pay ${Plugin.Instance.State.TotalPremium} (+{(int) (Plugin.Instance.State.FractionalPremiumIncrease * 100)}%) per day."));
-
 			// show only if there is a deductible
 			textElements.Add(Plugin.Instance.State.Policy.DeductiblePercent != 0.00
 				? TextElement.Create($"Your deductible is currently {(int) (Plugin.Instance.State.Policy.DeductiblePercent * 100)}% (minimum: ${Plugin.Instance.State.Policy.DeductibleMinimum}, maximum: ${Plugin.Instance.State.Policy.DeductibleMaximum}).")

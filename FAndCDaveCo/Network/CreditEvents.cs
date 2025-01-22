@@ -24,7 +24,8 @@ public static class CreditEvents
 			// make sure credits won't be negative
 			if (Plugin.Terminal.groupCredits < amount)
 			{
-				Plugin.Logger.LogError($"could not deduct {amount} credits; balance would be under 0");
+				Plugin.Terminal.groupCredits = 0;
+				Plugin.Logger.LogError($"could not completely deduct {amount} credits, balance set to zero");
 				return;
 			}
 
@@ -40,6 +41,7 @@ public static class CreditEvents
 		{
 			// find item
 			var item = StartOfRound.Instance.allItemsList.itemsList.Single(item => item.itemName.ToLower() == "gold bar");
+
 			// get player controller
 			var playerController = client.GetPlayerController();
 			if (playerController == null)
@@ -48,17 +50,15 @@ public static class CreditEvents
 				return;
 			}
 
-			// position to spawn at
-			var position = playerController.transform.position;
-
-			var gameObject = Object.Instantiate(item.spawnPrefab, position, Quaternion.identity, GameObject.Find("/Environment/HangarShip").transform);
-			// set object properties (scrap, value, location, etc)
-			gameObject.GetComponent<GrabbableObject>().itemProperties.isScrap = true;
-			gameObject.GetComponent<GrabbableObject>().itemProperties.creditsWorth = value;
-			gameObject.GetComponent<GrabbableObject>().SetScrapValue(value);
-			playerController.SetItemInElevator(true, true, gameObject.GetComponent<GrabbableObject>());
+			// spawn the item
+			var gameObject = Object.Instantiate(item.spawnPrefab, playerController.transform.position, Quaternion.identity, StartOfRound.Instance.elevatorTransform);
+			var grabbableObject = gameObject.GetComponent<GrabbableObject>();
+			// set scrap value
+			grabbableObject.SetScrapValue(value);
+			// mark as inside the ship
+			playerController.SetItemInElevator(droppedInShipRoom: true, droppedInElevator: true, gameObject.GetComponent<GrabbableObject>());
 			// spawn object
-			gameObject.GetComponent<NetworkObject>().Spawn(true);
+			gameObject.GetComponent<NetworkObject>().Spawn(destroyWithScene: true);
 
 			Plugin.Logger.LogDebug($"spawned gold bar with value of {value} at client {playerController.GetClientId()}");
 
@@ -68,8 +68,10 @@ public static class CreditEvents
 
 		SyncItemScrap = LNetworkMessage<Tuple<NetworkObjectReference, int>>.Connect("SyncItemScrapValue", onClientReceived: value =>
 		{
-			GameObject obj = value.Item1;
-			obj.GetComponent<GrabbableObject>().SetScrapValue(value.Item2);
+			GameObject gameObject = value.Item1;
+			var grabbableObject = gameObject.GetComponent<GrabbableObject>();
+			grabbableObject.SetScrapValue(value.Item2);
+			GameNetworkManager.Instance.localPlayerController.SetItemInElevator(droppedInShipRoom: true, droppedInElevator: true, grabbableObject);
 		});
 
 		TakeOutLoan = LNetworkEvent.Connect("TakeOutLoan",

@@ -32,7 +32,6 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 		if (StartOfRound.Instance.isChallengeFile)
 		{
 			LockedNotification(TextElement.Create("You cannot get an insurance policy while doing a challenge moon."));
-			Plugin.Logger.LogDebug("local player tried to get an insurance policy while doing a challenge moon");
 			return;
 		}
 
@@ -48,7 +47,6 @@ public class PolicySelectTerminal : InteractiveTerminalApplication
 
 	private void ConfirmCancelPolicy()
 	{
-		// make sure enough credits for initial premium payment
 		if (Plugin.Instance.State.Policy.Tier == PolicyTier.None)
 		{
 			Notification(backAction: PreviousScreenAction, TextElement.Create("You do not currently have a policy."));

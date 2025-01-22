@@ -19,7 +19,6 @@ public class BankLoanInformationTerminal : TerminalApplication
 			textElements.Add(TextElement.Create($"You currently have an unpaid loan from {Plugin.Instance.State.Loan.DaysSinceIssuance} day(s) ago (day {Plugin.Instance.State.Loan.IssuanceDate})."));
 			textElements.Add(TextElement.Create($"The loan is for ${Plugin.Instance.State.Loan.Principal} with ${Plugin.Instance.State.Loan.Interest} added as interest."));
 			textElements.Add(TextElement.Create($"Amount paid: ${Plugin.Instance.State.Loan.AmountPaid}, amount left: ${Plugin.Instance.State.Loan.AmountUnpaid}, total: ${Plugin.Instance.State.Loan.Total}."));
-
 			if (Plugin.Instance.State.Loan.DaysSinceIssuance >= Plugin.Instance.Config.PenaltyStartDaysFromIssuance.Value)
 			{
 				textElements.Add(TextElement.Create($"{(int) (Plugin.Instance.Config.PenaltyAmount.Value * 100)}% of your credits are currently being garnished each day."));

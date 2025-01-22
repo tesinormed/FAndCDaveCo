@@ -12,6 +12,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 
 	private CursorElement CreateCursorElement(double amount)
 	{
+		// maximum cost is the loan amount unpaid
 		var cost = Math.Min(
 			(int) (Plugin.Instance.State.Loan.Total * amount),
 			Plugin.Instance.State.Loan.AmountUnpaid
@@ -30,13 +31,12 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 	{
 		if (Plugin.Instance.State.Loan.Principal == 0)
 		{
-			LockedNotification(TextElement.Create("You can only submit a loan payment if you have a loan."));
-			Plugin.Logger.LogDebug("local player tried to submit a loan payment when there was no loan");
+			LockedNotification(TextElement.Create("You do not have a loan taken out."));
 			return;
 		}
 
 		(MainScreen, MainCursorMenu) = Selection(
-			prompt: "Pick an amount to pay towards the loan.",
+			"Pick an amount to pay towards the loan.",
 			CreateCursorElement(0.10),
 			CreateCursorElement(0.25),
 			CreateCursorElement(0.50),
@@ -49,7 +49,7 @@ public class BankLoanPaymentTerminal : InteractiveTerminalApplication
 	{
 		if (terminal.groupCredits < amount)
 		{
-			Notification(backAction: PreviousScreenAction, TextElement.Create($"You do not have enough credits to submit a payment of ${amount} for the loan."));
+			Notification(backAction: PreviousScreenAction, TextElement.Create($"You do not have enough credits to submit a payment of ${amount} towards the loan."));
 			return;
 		}
 
