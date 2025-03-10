@@ -17,67 +17,66 @@ internal static class StartOfRound_EndOfGame_Patch
 	public static void Prefix(ref StartOfRound __instance)
 	{
 		// make sure we're the server and it's not a challenge moon
-		if (__instance is { IsServer: true, isChallengeFile: false })
+		if (__instance is not { IsServer: true, isChallengeFile: false }) return;
+
+		// garbage collect old claims
+		foreach (var pair in Plugin.Instance.State.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Instance.Config.ClaimRetentionDays.Value))
 		{
-			// garbage collect old claims
-			foreach (var pair in Plugin.Instance.State.Claims.Where(pair => StartOfRound.Instance.gameStats.daysSpent - pair.Key > Plugin.Instance.Config.ClaimRetentionDays.Value))
+			Plugin.Instance.State.MutateClaims(claims => claims.Remove(pair.Key));
+			Plugin.Logger.LogDebug($"deleted old claim from day {pair.Key}");
+		}
+
+		// make sure there's a policy
+		if (Plugin.Instance.State.Policy != Policy.None)
+		{
+			// make sure that the credits are sufficient for the premium payment
+			if (Plugin.Terminal.groupCredits >= Plugin.Instance.State.TotalPremium)
 			{
-				Plugin.Instance.State.MutateClaims(claims => claims.Remove(pair.Key));
-				Plugin.Logger.LogDebug($"deleted old claim from day {pair.Key}");
+				// deduct premium payment
+				CreditEvents.DeductGroupCredits.SendServer(Plugin.Instance.State.TotalPremium);
+
+				// notify everyone about the successful renewal
+				HUDManagerEvents.InsuranceRenewalSuccess.SendClients(Plugin.Instance.State.TotalPremium);
+
+				Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.Instance.State.TotalPremium}");
+			}
+			else
+			{
+				// cancel policy
+				Plugin.Instance.State.Policy = Policy.None;
+
+				// notify everyone about the failed renewal
+				HUDManagerEvents.InsuranceRenewalFail.InvokeClients();
+
+				Plugin.Logger.LogDebug("insurance failed to renew");
+			}
+		}
+
+		// check if there's an unpaid loan and if it's been more than the set amount of days
+		if (Plugin.Instance.State.Loan.AmountUnpaid > 0 && Plugin.Instance.State.Loan.DaysSinceIssuance >= Plugin.Instance.Config.PenaltyStartDaysFromIssuance.Value)
+		{
+			var amountGarnished = System.Math.Min(
+				(int) (Plugin.Terminal.groupCredits * Plugin.Instance.Config.PenaltyAmount.Value),
+				Plugin.Instance.State.Loan.AmountUnpaid
+			);
+
+			// credit garnishment
+			CreditEvents.DeductGroupCredits.SendServer(amountGarnished);
+			Plugin.Logger.LogDebug($"garnished ${amountGarnished} from group credits due to loan nonpayment");
+
+			if (Plugin.Instance.State.Loan.AmountUnpaid - amountGarnished == 0)
+			{
+				Plugin.Instance.State.Loan = Loan.None;
+				Plugin.Logger.LogDebug("loan fully paid off due to garnishment");
+			}
+			else
+			{
+				Plugin.Instance.State.Loan = Plugin.Instance.State.Loan with { AmountPaid = Plugin.Instance.State.Loan.AmountPaid + amountGarnished };
+				Plugin.Logger.LogDebug($"loan amount paid increased by {amountGarnished}");
 			}
 
-			// make sure there's a policy
-			if (Plugin.Instance.State.Policy != Policy.None)
-			{
-				// make sure that the credits are sufficient for the premium payment
-				if (Plugin.Terminal.groupCredits >= Plugin.Instance.State.TotalPremium)
-				{
-					// deduct premium payment
-					CreditEvents.DeductGroupCredits.SendServer(Plugin.Instance.State.TotalPremium);
-
-					// notify everyone about the successful renewal
-					HUDManagerEvents.InsuranceRenewalSuccess.SendClients(Plugin.Instance.State.TotalPremium);
-
-					Plugin.Logger.LogDebug($"insurance successfully renewed with premium of {Plugin.Instance.State.TotalPremium}");
-				}
-				else
-				{
-					// cancel policy
-					Plugin.Instance.State.Policy = Policy.None;
-
-					// notify everyone about the failed renewal
-					HUDManagerEvents.InsuranceRenewalFail.InvokeClients();
-
-					Plugin.Logger.LogDebug("insurance failed to renew");
-				}
-			}
-
-			// check if there's an unpaid loan and if it's been more than the set amount of days
-			if (Plugin.Instance.State.Loan.AmountUnpaid > 0 && Plugin.Instance.State.Loan.DaysSinceIssuance >= Plugin.Instance.Config.PenaltyStartDaysFromIssuance.Value)
-			{
-				var amountGarnished = System.Math.Min(
-					(int) (Plugin.Terminal.groupCredits * Plugin.Instance.Config.PenaltyAmount.Value),
-					Plugin.Instance.State.Loan.AmountUnpaid
-				);
-
-				// credit garnishment
-				CreditEvents.DeductGroupCredits.SendServer(amountGarnished);
-				Plugin.Logger.LogDebug($"garnished ${amountGarnished} from group credits due to loan nonpayment");
-
-				if (Plugin.Instance.State.Loan.AmountUnpaid - amountGarnished == 0)
-				{
-					Plugin.Instance.State.Loan = Loan.None;
-					Plugin.Logger.LogDebug("loan fully paid off due to garnishment");
-				}
-				else
-				{
-					Plugin.Instance.State.Loan = Plugin.Instance.State.Loan with { AmountPaid = Plugin.Instance.State.Loan.AmountPaid + amountGarnished };
-					Plugin.Logger.LogDebug($"loan amount paid increased by {amountGarnished}");
-				}
-
-				// notify everyone about the credits garnishing
-				HUDManagerEvents.BankLoanCreditsGarnished.SendClients(amountGarnished);
-			}
+			// notify everyone about the credits garnishing
+			HUDManagerEvents.BankLoanCreditsGarnished.SendClients(amountGarnished);
 		}
 	}
 
@@ -113,14 +112,11 @@ internal static class StartOfRound_EndOfGame_Patch
 		} while (values.MoveNext());
 
 		// make sure we're the server and it's not a challenge moon
-		if (__instance is { IsServer: true, isChallengeFile: false })
-		{
-			// make sure we aren't getting fired
-			if (!(TimeOfDay.Instance.timeUntilDeadline <= 0.0))
-			{
-				// show all queued HUD tips
-				HUDManagerEvents.RunShowQueuedHudTips.InvokeClients();
-			}
-		}
+		if (__instance is not { IsServer: true, isChallengeFile: false }) yield break;
+		// make sure we aren't getting fired
+		if (TimeOfDay.Instance.timeUntilDeadline <= 0.0) yield break;
+
+		// show all queued HUD tips
+		HUDManagerEvents.RunShowQueuedHudTips.InvokeClients();
 	}
 }

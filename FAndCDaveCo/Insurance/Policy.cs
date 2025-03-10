@@ -5,7 +5,7 @@ namespace tesinormed.FAndCDaveCo.Insurance;
 
 public record struct Policy
 {
-	[ES3NonSerializable] public static readonly Policy None = new(PolicyTier.None, 0);
+	[ES3NonSerializable] public static readonly Policy None = new(PolicyTier.None, coverage: 0);
 
 	public PolicyTier Tier;
 	public int Coverage;

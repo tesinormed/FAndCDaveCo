@@ -4,14 +4,14 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "tesinormed"
 name = "FAndCDaveCo"
-versionNumber = "3.0.1"
+versionNumber = "3.0.2"
 description = "Adds an insurance system and a loan system"
 websiteUrl = "https://github.com/tesinormed/FAndCDaveCo"
 containsNsfwContent = false
 
 [package.dependencies]
 BepInEx-BepInExPack = "5.4.2100"
-BMX-LobbyCompatibility = "1.3.0"
+BMX-LobbyCompatibility = "1.4.0"
 WhiteSpike-Interactive_Terminal_API = "1.2.0"
 MaxWasUnavailable-LethalModDataLib = "1.2.2"
 xilophor-LethalNetworkAPI = "3.3.2"

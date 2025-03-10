@@ -81,4 +81,6 @@ Thank you to the following people / groups for inspiration, documentation, libra
 
 ## Contact
 
-Please use the [GitHub issue tracker](https://github.com/tesinormed/FAndCDaveCo/issues) for any issues, requests, or inquiries.
+You can:
+* use the [GitHub issue tracker](https://github.com/tesinormed/FAndCDaveCo/issues)
+* join the [Amaranth Legacy Discord](https://discord.amaranth-legacy.community/) and ping `tesinormed`

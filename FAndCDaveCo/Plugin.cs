@@ -18,7 +18,7 @@ namespace tesinormed.FAndCDaveCo;
 [BepInDependency("BMX.LobbyCompatibility")]
 [BepInDependency("WhiteSpike.InteractiveTerminalAPI")]
 [BepInDependency("MaxWasUnavailable.LethalModDataLib")]
-[BepInDependency("LethalNetworkAPI", "3.0.0")]
+[BepInDependency("LethalNetworkAPI", MinimumDependencyVersion: "3.0.0")]
 // mark this plugin as required on both sides (server and client)
 // mark this plugin as requiring the same minor version (Y, where X.Y.Z)
 [LobbyCompatibility(CompatibilityLevel.Everyone, VersionStrictness.Major)]

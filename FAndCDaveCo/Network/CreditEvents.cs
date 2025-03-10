@@ -56,7 +56,7 @@ public static class CreditEvents
 			// set scrap value
 			grabbableObject.SetScrapValue(value);
 			// mark as inside the ship
-			playerController.SetItemInElevator(droppedInShipRoom: true, droppedInElevator: true, gameObject.GetComponent<GrabbableObject>());
+			playerController.SetItemInElevator(droppedInShipRoom: true, droppedInElevator: true, grabbableObject);
 			// spawn object
 			gameObject.GetComponent<NetworkObject>().Spawn(destroyWithScene: true);
 

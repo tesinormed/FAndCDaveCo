@@ -5,7 +5,7 @@ namespace tesinormed.FAndCDaveCo.Bank;
 
 public record struct Loan
 {
-	[ES3NonSerializable] public static readonly Loan None = new(0, 0);
+	[ES3NonSerializable] public static readonly Loan None = new(issuanceDate: 0, principal: 0);
 
 	public int IssuanceDate;
 	[ES3NonSerializable] public int DaysSinceIssuance => StartOfRound.Instance.gameStats.daysSpent - IssuanceDate;
